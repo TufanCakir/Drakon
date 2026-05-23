@@ -1,0 +1,877 @@
+//
+//  GameView.swift
+//  Drakon
+//
+//  Created by Tufan Cakir on 23.05.26.
+//
+
+import Combine
+import SwiftUI
+
+struct GameView: View {
+    @EnvironmentObject private var appModel: AppModel
+    @ObservedObject private var dailyRewardManager = DailyRewardManager.shared
+    @StateObject private var battle = BattleViewModel()
+    @State private var showsDailyLogin = false
+    @State private var showsEventAttacks = false
+    @State private var eventVictory: EventVictoryResult?
+
+    var body: some View {
+        ZStack {
+            DrakonScreenBackground()
+
+            VStack(spacing: 0) {
+                battleHeader
+
+                Spacer(minLength: 10)
+
+                enemyArea
+
+                Spacer(minLength: 14)
+
+                playerArea
+
+                if battle.isEventBattle {
+                    eventSkillButton
+                        .padding(.top, 10)
+                }
+
+                Spacer(minLength: 12)
+
+                battleFooter
+            }
+            .padding(.horizontal, 18)
+            .padding(.top, 48)
+            .padding(.bottom, 18)
+
+            if let drawnForm = battle.drawnForm {
+                summonCard(for: drawnForm)
+                    .transition(.scale.combined(with: .opacity))
+                    .zIndex(10)
+            }
+
+            if let message = battle.floatingMessage {
+                Text(message)
+                    .font(.system(size: 15, weight: .black, design: .rounded))
+                    .foregroundStyle(DrakonBladePalette.gold)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 10)
+                    .background(DrakonBladePalette.panel)
+                    .clipShape(DrakonBladeShape(pointDepth: 16, slant: 10))
+                    .overlay(
+                        DrakonBladeShape(pointDepth: 16, slant: 10)
+                            .stroke(DrakonBladePalette.gold, lineWidth: 1.5)
+                    )
+                    .offset(y: -42)
+                    .zIndex(12)
+            }
+
+            if let eventVictory {
+                EventVictoryView(result: eventVictory) {
+                    self.eventVictory = nil
+                    EventRuntime.shared.clear()
+                    appModel.selectedLevelId = nil
+                    appModel.appState = .home
+                }
+                .zIndex(20)
+            }
+        }
+        .ignoresSafeArea()
+        .contentShape(Rectangle())
+        .onTapGesture {
+            battle.attackEnemy()
+        }
+        .onAppear {
+            battle.configure(appModel: appModel) { result in
+                eventVictory = result
+            }
+            dailyRewardManager.refreshAvailability()
+            showsDailyLogin = dailyRewardManager.canClaimToday
+        }
+        .onDisappear {
+            battle.saveLastSeen()
+        }
+        .task {
+            await battle.runAutoBattle()
+        }
+        .sheet(isPresented: $showsDailyLogin) {
+            DailyLoginPopupView()
+        }
+        .sheet(isPresented: $showsEventAttacks) {
+            eventAttackSheet
+                .presentationDetents([.medium])
+        }
+    }
+
+    private var battleHeader: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 10) {
+                Button {
+                    battle.exitBattle()
+                } label: {
+                    Text("EXIT")
+                        .font(
+                            .system(size: 12, weight: .black, design: .rounded)
+                        )
+                        .foregroundStyle(.white)
+                        .frame(width: 78, height: 34)
+                        .background(DrakonBladePalette.panel)
+                        .clipShape(DrakonBladeShape(pointDepth: 12, slant: 8))
+                        .overlay(
+                            DrakonBladeShape(pointDepth: 12, slant: 8)
+                                .stroke(DrakonBladePalette.gold, lineWidth: 1.5)
+                        )
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
+
+                Text("COINS \(battle.coins)  GEMS \(battle.gems)")
+                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .foregroundStyle(DrakonBladePalette.gold)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+            }
+
+            HStack(spacing: 10) {
+                Rectangle()
+                    .fill(DrakonBladePalette.gold.opacity(0.70))
+                    .frame(width: 82, height: 2)
+
+                Rectangle()
+                    .fill(DrakonBladePalette.gold.opacity(0.32))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 2)
+            }
+        }
+    }
+
+    private var enemyArea: some View {
+        VStack(spacing: 12) {
+            Text("STAGE \(battle.stage)")
+                .font(.system(size: 22, weight: .black, design: .rounded))
+                .foregroundStyle(DrakonBladePalette.gold)
+
+            RemoteAssetImage(name: battle.enemyImageName)
+                .scaledToFit()
+                .frame(width: 132, height: 132)
+                .padding(12)
+                .background(DrakonBladePalette.panel)
+                .clipShape(DrakonCutRectangle(cut: 14))
+                .overlay(
+                    DrakonCutRectangle(cut: 14)
+                        .stroke(DrakonBladePalette.gold, lineWidth: 2)
+                )
+
+            ProgressView(value: battle.enemyHealthRatio)
+                .progressViewStyle(.linear)
+                .tint(DrakonBladePalette.gold)
+                .frame(maxWidth: 270)
+                .scaleEffect(x: 1, y: 1.5, anchor: .center)
+
+            Text("HP \(battle.enemyHP) / \(battle.enemyMaxHP)")
+                .font(.system(size: 13, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+        }
+    }
+
+    private var playerArea: some View {
+        VStack(spacing: 10) {
+            RemoteAssetImage(name: battle.currentForm.assetName)
+                .scaledToFit()
+                .frame(width: 190, height: 190)
+                .scaleEffect(battle.playerPulse ? 0.94 : 1.0)
+                .animation(.snappy(duration: 0.12), value: battle.playerPulse)
+
+            HStack(spacing: 8) {
+                Text(battle.currentForm.title)
+                    .font(.system(size: 18, weight: .black, design: .rounded))
+                    .foregroundStyle(DrakonBladePalette.gold)
+
+                Text(battle.currentForm.element.title)
+                    .font(.system(size: 10, weight: .black, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.72))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(DrakonBladePalette.panelLight)
+                    .clipShape(DrakonBladeShape(pointDepth: 8, slant: 5))
+            }
+        }
+    }
+
+    private var eventSkillButton: some View {
+        Button {
+            showsEventAttacks = true
+        } label: {
+            VStack(spacing: 2) {
+                RemoteAssetImage(
+                    name: battle.eventAttacks.first?.icon
+                        ?? "evolution_drakon_imperial"
+                )
+                .scaledToFit()
+                .frame(width: 34, height: 28)
+
+                Text("SKILL")
+                    .font(.system(size: 10, weight: .black, design: .rounded))
+                    .foregroundStyle(DrakonBladePalette.black)
+            }
+            .frame(width: 104, height: 56)
+            .background(DrakonBladePalette.gold)
+            .clipShape(DrakonBladeShape(pointDepth: 18, slant: 11))
+            .overlay(
+                DrakonBladeShape(pointDepth: 18, slant: 11)
+                    .stroke(DrakonBladePalette.blue, lineWidth: 2)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var battleFooter: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 14) {
+                Button {
+                    battle.summonEvolutionCard()
+                } label: {
+                    RemoteAssetImage(name: battle.nextEvolutionForm.assetName)
+                        .scaledToFit()
+                        .frame(width: 52, height: 52)
+                        .frame(width: 72, height: 72)
+                        .background(
+                            battle.canSummonEvolution
+                                ? DrakonBladePalette.gold
+                                : DrakonBladePalette.blue.opacity(0.45)
+                        )
+                        .clipShape(DrakonBladeShape(pointDepth: 16, slant: 11))
+                        .overlay(
+                            DrakonBladeShape(pointDepth: 16, slant: 11)
+                                .stroke(
+                                    battle.canSummonEvolution
+                                        ? DrakonBladePalette.blue
+                                        : DrakonBladePalette.gold.opacity(0.45),
+                                    lineWidth: 2
+                                )
+                        )
+                }
+                .buttonStyle(.plain)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("EVOLUTION ENERGY \(Int(battle.evolutionEnergy))%")
+                        .font(
+                            .system(size: 14, weight: .black, design: .rounded)
+                        )
+                        .foregroundStyle(.white)
+
+                    ProgressView(value: battle.evolutionEnergy / 100)
+                        .progressViewStyle(.linear)
+                        .tint(
+                            battle.canSummonEvolution
+                                ? DrakonBladePalette.gold
+                                : DrakonBladePalette.blue
+                        )
+                        .scaleEffect(x: 1, y: 1.7, anchor: .center)
+
+                    Text(
+                        battle.canSummonEvolution
+                            ? "EVOLUTION READY" : "ATTACK TO CHARGE"
+                    )
+                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .foregroundStyle(
+                        battle.canSummonEvolution
+                            ? DrakonBladePalette.gold
+                            : DrakonBladePalette.mutedText
+                    )
+                }
+            }
+
+            HStack(spacing: 12) {
+                upgradeButton(
+                    title: "ATK",
+                    value:
+                        "LV \(battle.attackLevel)  \(battle.attackUpgradeCost)",
+                    tint: DrakonBladePalette.gold
+                ) {
+                    battle.upgradeAttack()
+                }
+
+                upgradeButton(
+                    title: "ENE",
+                    value:
+                        "LV \(battle.energyLevel)  \(battle.energyUpgradeCost)",
+                    tint: DrakonBladePalette.blue
+                ) {
+                    battle.upgradeEnergy()
+                }
+            }
+        }
+        .padding(14)
+        .background(DrakonBladePalette.panel.opacity(0.96))
+        .overlay(
+            Rectangle()
+                .stroke(.white.opacity(0.10), lineWidth: 1)
+        )
+    }
+
+    private var eventAttackSheet: some View {
+        ZStack {
+            DrakonScreenBackground()
+
+            VStack(alignment: .leading, spacing: 16) {
+                Text("SPECIAL ATTACK")
+                    .font(.system(size: 22, weight: .black, design: .rounded))
+                    .foregroundStyle(DrakonBladePalette.gold)
+
+                LazyVGrid(
+                    columns: [GridItem(.flexible()), GridItem(.flexible())],
+                    spacing: 12
+                ) {
+                    ForEach(battle.eventAttacks.prefix(4)) { attack in
+                        Button {
+                            showsEventAttacks = false
+                            battle.useEventAttack(attack)
+                        } label: {
+                            HStack(spacing: 10) {
+                                RemoteAssetImage(name: attack.icon)
+                                    .scaledToFit()
+                                    .frame(width: 38, height: 38)
+
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(attack.title.uppercased())
+                                        .font(
+                                            .system(
+                                                size: 11,
+                                                weight: .black,
+                                                design: .rounded
+                                            )
+                                        )
+                                        .foregroundStyle(.white)
+                                        .lineLimit(1)
+                                        .minimumScaleFactor(0.72)
+
+                                    Text("PWR \(attack.power)")
+                                        .font(
+                                            .system(
+                                                size: 10,
+                                                weight: .black,
+                                                design: .rounded
+                                            )
+                                        )
+                                        .foregroundStyle(
+                                            DrakonBladePalette.gold
+                                        )
+                                }
+
+                                Spacer(minLength: 0)
+                            }
+                            .padding(10)
+                            .frame(height: 62)
+                            .background(DrakonBladePalette.panel)
+                            .clipShape(
+                                DrakonBladeShape(pointDepth: 16, slant: 9)
+                            )
+                            .overlay(
+                                DrakonBladeShape(pointDepth: 16, slant: 9)
+                                    .stroke(
+                                        DrakonBladePalette.blue,
+                                        lineWidth: 1.5
+                                    )
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+
+                Spacer()
+            }
+            .padding(22)
+        }
+    }
+
+    private func upgradeButton(
+        title: String,
+        value: String,
+        tint: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 10, weight: .black, design: .rounded))
+                    .foregroundStyle(tint)
+
+                Text(value)
+                    .font(.system(size: 13, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 12)
+            .frame(height: 40)
+            .background(DrakonBladePalette.black)
+            .clipShape(DrakonBladeShape(pointDepth: 13, slant: 8))
+            .overlay(
+                DrakonBladeShape(pointDepth: 13, slant: 8)
+                    .stroke(tint, lineWidth: 1.5)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func summonCard(for form: BattleViewModel.EvolutionForm)
+        -> some View
+    {
+        VStack(spacing: 12) {
+            RemoteAssetImage(name: form.assetName)
+                .scaledToFit()
+                .frame(width: 116, height: 116)
+
+            Text(form.title)
+                .font(.system(size: 18, weight: .black, design: .rounded))
+                .foregroundStyle(DrakonBladePalette.gold)
+
+            Text(form == battle.currentForm ? "SAME FORM" : "EVOLUTION")
+                .font(.system(size: 12, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+        }
+        .frame(width: 168, height: 224)
+        .background(DrakonBladePalette.panel)
+        .clipShape(DrakonCutRectangle(cut: 18))
+        .overlay(
+            DrakonCutRectangle(cut: 18)
+                .stroke(
+                    form == battle.currentForm
+                        ? DrakonBladePalette.blue : DrakonBladePalette.gold,
+                    lineWidth: 3
+                )
+        )
+    }
+}
+
+@MainActor
+final class BattleViewModel: ObservableObject {
+    enum EvolutionForm: CaseIterable, Equatable {
+        case baby
+        case rookie
+        case advanced
+        case imperial
+
+        var assetName: String {
+            switch self {
+            case .baby: "evolution_drakon_baby"
+            case .rookie: "evolution_drakon_rookie"
+            case .advanced: "evolution_drakon_advanced"
+            case .imperial: "evolution_drakon_imperial"
+            }
+        }
+
+        var title: String {
+            switch self {
+            case .baby: "PYRO"
+            case .rookie: "BLAZION"
+            case .advanced: "INFERNON"
+            case .imperial: "SOLARION"
+            }
+        }
+
+        var attackPower: Int {
+            switch self {
+            case .baby: 12
+            case .rookie: 20
+            case .advanced: 34
+            case .imperial: 55
+            }
+        }
+
+        var energyGain: Double {
+            switch self {
+            case .baby: 12
+            case .rookie: 10
+            case .advanced: 8
+            case .imperial: 6
+            }
+        }
+
+        var element: DrakonElement {
+            switch self {
+            case .baby: .fire
+            case .rookie: .water
+            case .advanced: .nature
+            case .imperial: .fire
+            }
+        }
+
+        var characterId: String {
+            switch self {
+            case .baby: "character_drakon_baby"
+            case .rookie: "character_drakon_rookie"
+            case .advanced: "character_drakon_advanced"
+            case .imperial: "character_drakon_imperial"
+            }
+        }
+    }
+
+    @Published var currentForm: EvolutionForm = .baby
+    @Published var nextEvolutionForm: EvolutionForm = .rookie
+    @Published var drawnForm: EvolutionForm?
+    @Published var evolutionEnergy = 0.0
+    @Published var enemyHP = 150
+    @Published var enemyMaxHP = 150
+    @Published var stage = 1
+    @Published var attackLevel = 1
+    @Published var energyLevel = 1
+    @Published var eventAttacks: [EventAttack] = []
+    @Published var floatingMessage: String?
+    @Published var playerPulse = false
+    @Published var coins = 0
+    @Published var gems = 0
+
+    private weak var appModel: AppModel?
+    private var onEventVictory: ((EventVictoryResult) -> Void)?
+    private var lastAttackTime: TimeInterval = 0
+    private var eventKills = 0
+    private var eventEnded = false
+    private var configured = false
+
+    private let attackLevelKey = "drakon_idle_attack_level"
+    private let energyLevelKey = "drakon_idle_energy_level"
+    private let lastSeenKey = "drakon_idle_last_seen"
+
+    var canSummonEvolution: Bool { evolutionEnergy >= 100 }
+    var enemyHealthRatio: Double {
+        enemyMaxHP == 0 ? 0 : Double(enemyHP) / Double(enemyMaxHP)
+    }
+    var attackUpgradeCost: Int { 40 + attackLevel * 28 }
+    var energyUpgradeCost: Int { 35 + energyLevel * 24 }
+    var isEventBattle: Bool {
+        appModel?.selectedLevelId?.lowercased().contains("event") == true
+            || EventRuntime.shared.activeEvent != nil
+    }
+
+    var enemyImageName: String {
+        EventRuntime.shared.activeEvent?.icon ?? "evolution_drakon_imperial"
+    }
+
+    func configure(
+        appModel: AppModel,
+        onEventVictory: @escaping (EventVictoryResult) -> Void
+    ) {
+        self.appModel = appModel
+        self.onEventVictory = onEventVictory
+        guard !configured else { return }
+        configured = true
+
+        loadIdleProgress()
+        eventAttacks = EventAttackLoader.load()
+        rollNextEvolutionForm()
+        claimOfflineRewards()
+        spawnEnemy()
+        refreshCurrencies()
+    }
+
+    func runAutoBattle() async {
+        while !Task.isCancelled {
+            try? await Task.sleep(
+                nanoseconds: UInt64(autoAttackInterval * 1_000_000_000)
+            )
+            guard !Task.isCancelled, !isEventBattle else { continue }
+            attackEnemy(isAuto: true)
+        }
+    }
+
+    func attackEnemy(isAuto: Bool = false) {
+        let now = CACurrentMediaTime()
+        guard isAuto || now - lastAttackTime > 0.12 else { return }
+        lastAttackTime = now
+
+        enemyHP = max(0, enemyHP - attackDamage)
+        evolutionEnergy = min(100, evolutionEnergy + energyGain)
+        pulsePlayer()
+
+        if enemyHP == 0 {
+            handleEnemyDefeated()
+        }
+    }
+
+    func summonEvolutionCard() {
+        guard canSummonEvolution else { return }
+        guard !availableEvolutionForms.isEmpty else {
+            showMessage("SUMMON FORMS FIRST")
+            evolutionEnergy = 0
+            return
+        }
+
+        let form = nextEvolutionForm
+        drawnForm = form
+
+        if form != currentForm {
+            currentForm = form
+            pulsePlayer()
+        }
+
+        rollNextEvolutionForm()
+        evolutionEnergy = 0
+
+        Task {
+            try? await Task.sleep(nanoseconds: 850_000_000)
+            if drawnForm == form {
+                drawnForm = nil
+            }
+        }
+    }
+
+    func useEventAttack(_ attack: EventAttack) {
+        enemyHP = max(0, enemyHP - attack.power)
+        showMessage(attack.title.uppercased())
+
+        if enemyHP == 0 {
+            handleEnemyDefeated()
+        }
+    }
+
+    func upgradeAttack() {
+        guard CoinManager.shared.spend(attackUpgradeCost) else {
+            showMessage("NOT ENOUGH COINS")
+            return
+        }
+
+        attackLevel += 1
+        saveIdleProgress()
+        refreshCurrencies()
+        showMessage("ATTACK LV \(attackLevel)")
+    }
+
+    func upgradeEnergy() {
+        guard CoinManager.shared.spend(energyUpgradeCost) else {
+            showMessage("NOT ENOUGH COINS")
+            return
+        }
+
+        energyLevel += 1
+        saveIdleProgress()
+        refreshCurrencies()
+        showMessage("ENERGY LV \(energyLevel)")
+    }
+
+    func exitBattle() {
+        saveLastSeen()
+        appModel?.selectedLevelId = nil
+        EventRuntime.shared.clear()
+        appModel?.appState = .home
+    }
+
+    func saveLastSeen() {
+        UserDefaults.standard.set(
+            Date().timeIntervalSince1970,
+            forKey: lastSeenKey
+        )
+    }
+
+    private func spawnEnemy() {
+        enemyMaxHP = 130 + stage * 35
+        enemyHP = enemyMaxHP
+    }
+
+    private func handleEnemyDefeated() {
+        grantKillRewards()
+
+        if isEventBattle {
+            eventKills += 1
+            if eventKills >= eventTargetKills {
+                finishEventBattle()
+                return
+            }
+        }
+
+        stage += 1
+        spawnEnemy()
+    }
+
+    private func grantKillRewards() {
+        let coins = stageRewardCoins
+        CoinManager.shared.add(coins)
+        PassProgressManager.shared.addPoints(isEventBattle ? 12 : 5)
+
+        if stage.isMultiple(of: 5) {
+            GemManager.shared.add(1)
+        }
+
+        if isEventBattle {
+            let reward = EventRuntime.shared.activeEvent?.rewards
+            EventCurrencyManager.shared.add(
+                max(1, (reward?.eventToken ?? 20) / 10)
+            )
+            if stage.isMultiple(of: 3) {
+                RubyManager.shared.add(max(1, reward?.gems ?? 1))
+            }
+        }
+
+        refreshCurrencies()
+        showMessage("+\(coins) COINS")
+    }
+
+    private func finishEventBattle() {
+        guard !eventEnded else { return }
+        eventEnded = true
+
+        let event = EventRuntime.shared.activeEvent
+        let reward = event?.rewards
+        let medalDefinition = medalDefinition(for: reward?.medalId)
+        let coins = reward?.coins ?? stageRewardCoins
+        let rubies = reward?.gems ?? 0
+        let tokens = reward?.eventToken ?? 0
+        let draken = reward?.draken ?? 0
+        let eggRewards = reward?.eggs ?? []
+        let medals = reward?.medals ?? 0
+
+        CoinManager.shared.add(coins)
+        RubyManager.shared.add(rubies)
+        EventCurrencyManager.shared.add(tokens)
+        DrakenManager.shared.add(draken)
+
+        for eggReward in eggRewards {
+            EggInventoryManager.shared.add(
+                eggReward.amount,
+                eggId: eggReward.eggId
+            )
+        }
+
+        if let medalId = reward?.medalId, medals > 0 {
+            DrakonMedalManager.shared.add(medals, medalId: medalId)
+        }
+
+        refreshCurrencies()
+        onEventVictory?(
+            EventVictoryResult(
+                title: event?.title ?? "Event Clear",
+                icon: event?.icon ?? enemyImageName,
+                coins: coins,
+                rubies: rubies,
+                eventTokens: tokens,
+                draken: draken,
+                eggRewards: eggRewards,
+                medalId: reward?.medalId,
+                medalTitle: medalDefinition?.title,
+                medalIcon: medalDefinition?.icon,
+                medals: medals
+            )
+        )
+    }
+
+    private func medalDefinition(for medalId: String?) -> DrakonMedalDefinition?
+    {
+        guard let medalId else { return nil }
+        return UpgradeConfigLoader.load().medalDefinitions.first {
+            $0.id == medalId
+        }
+    }
+
+    private func rollNextEvolutionForm() {
+        nextEvolutionForm = availableEvolutionForms.randomElement() ?? .baby
+    }
+
+    private var availableEvolutionForms: [EvolutionForm] {
+        let ownedIds = Set(
+            appModel?.teamManager.ownedCharacters.map(\.baseId) ?? []
+        )
+        return EvolutionForm.allCases.filter { form in
+            form != .baby && ownedIds.contains(form.characterId)
+        }
+    }
+
+    private var attackDamage: Int {
+        let baseDamage = currentForm.attackPower + attackLevel * 4
+        return Int(Double(baseDamage) * elementMultiplier)
+    }
+
+    private var elementMultiplier: Double {
+        ElementSystem.multiplier(
+            attacker: currentForm.element,
+            defender: enemyElement
+        )
+    }
+
+    private var enemyElement: DrakonElement {
+        DrakonElement.parse(EventRuntime.shared.activeEvent?.enemyElement)
+    }
+
+    private var energyGain: Double {
+        currentForm.energyGain + Double(energyLevel - 1) * 1.5
+    }
+
+    private var autoAttackInterval: TimeInterval {
+        max(0.45, 1.35 - Double(attackLevel) * 0.04)
+    }
+
+    private var stageRewardCoins: Int {
+        10 + stage * 3
+    }
+
+    private var eventTargetKills: Int {
+        max(1, EventRuntime.shared.activeEvent?.targetStages ?? 5)
+    }
+
+    private func loadIdleProgress() {
+        let defaults = UserDefaults.standard
+        attackLevel = max(1, defaults.integer(forKey: attackLevelKey))
+        energyLevel = max(1, defaults.integer(forKey: energyLevelKey))
+    }
+
+    private func saveIdleProgress() {
+        let defaults = UserDefaults.standard
+        defaults.set(attackLevel, forKey: attackLevelKey)
+        defaults.set(energyLevel, forKey: energyLevelKey)
+    }
+
+    private func claimOfflineRewards() {
+        guard !isEventBattle else { return }
+
+        let defaults = UserDefaults.standard
+        let lastSeen = defaults.double(forKey: lastSeenKey)
+        saveLastSeen()
+
+        guard lastSeen > 0 else { return }
+
+        let offlineSeconds = min(
+            8 * 60 * 60,
+            max(0, Date().timeIntervalSince1970 - lastSeen)
+        )
+        guard offlineSeconds >= 60 else { return }
+
+        let kills = Int(offlineSeconds / 45) + attackLevel
+        let coins = kills * max(5, stageRewardCoins)
+        let gems = kills / 12
+
+        CoinManager.shared.add(coins)
+        GemManager.shared.add(gems)
+        refreshCurrencies()
+        showMessage("OFFLINE +\(coins) COINS +\(gems) GEMS")
+    }
+
+    private func refreshCurrencies() {
+        coins = CoinManager.shared.coins
+        gems = GemManager.shared.gems
+    }
+
+    private func pulsePlayer() {
+        playerPulse = true
+        Task {
+            try? await Task.sleep(nanoseconds: 110_000_000)
+            playerPulse = false
+        }
+    }
+
+    private func showMessage(_ text: String) {
+        floatingMessage = text
+        Task {
+            try? await Task.sleep(nanoseconds: 900_000_000)
+            if floatingMessage == text {
+                floatingMessage = nil
+            }
+        }
+    }
+}
+
+#Preview {
+    GameView()
+        .environmentObject(AppModel())
+}

@@ -1,0 +1,15 @@
+{
+    "eggs": [
+        {
+            "id": "egg_drakon_baby_fire",
+            "title": "Pyro Egg",
+            "eggImage": "egg_drakon_fire",
+            "babyImage": "evolution_drakon_baby",
+            "characterId": "character_drakon_baby",
+            "hatchCostDraken": 100,
+            "rarity": "common",
+            "element": "fire",
+            "description": "Schluepft zu Pyro."
+        }
+    ]
+}

@@ -1,0 +1,97 @@
+{
+    "jsonFiles": [
+        "game_config",
+        "starter_eggs",
+        "characters",
+        "summons",
+        "shop",
+        "events",
+        "event_attacks",
+        "gifts",
+        "pass_rewards",
+        "daily_rewards",
+        "upgrade_config",
+        "eggs",
+        "skins",
+        "tutorials"
+    ],
+    "assetBaseURL": "https://remotedrakon.tufancakir.com/assets",
+    "assets": [
+        {
+            "id": "icon_house",
+            "file": "icon_house.png"
+        },
+        {
+            "id": "icon_team",
+            "file": "icon_team.png"
+        },
+        {
+            "id": "icon_summon",
+            "file": "icon_summon.png"
+        },
+        {
+            "id": "icon_shop",
+            "file": "icon_shop.png"
+        },
+        {
+            "id": "icon_trade",
+            "file": "icon_trade.png"
+        },
+        {
+            "id": "drakon_icon",
+            "file": "drakon_icon.png"
+        },
+        {
+            "id": "evolution_drakon_baby",
+            "file": "evolution_drakon_baby.png"
+        },
+        {
+            "id": "evolution_drakon_rookie",
+            "file": "evolution_drakon_rookie.png"
+        },
+        {
+            "id": "evolution_drakon_advanced",
+            "file": "evolution_drakon_advanced.png"
+        },
+        {
+            "id": "evolution_drakon_imperial",
+            "file": "evolution_drakon_imperial.png"
+        },
+        {
+            "id": "icon_drakon_coin",
+            "file": "icon_drakon_coin.png"
+        },
+        {
+            "id": "icon_drakon_gem",
+            "file": "icon_drakon_gem.png"
+        },
+        {
+            "id": "icon_drakon_ruby",
+            "file": "icon_drakon_ruby.png"
+        },
+        {
+            "id": "icon_drakon_shard",
+            "file": "icon_drakon_shard.png"
+        },
+        {
+            "id": "icon_draken",
+            "file": "icon_draken.png"
+        },
+        {
+            "id": "icon_info",
+            "file": "icon_info.png"
+        },
+        {
+            "id": "egg_drakon_fire",
+            "file": "egg_drakon_fire.png"
+        },
+        {
+            "id": "skin_solarion_gold",
+            "file": "evolution_drakon_imperial.png"
+        },
+        {
+            "id": "loading1",
+            "file": "evolution_drakon_imperial.png"
+        }
+    ]
+}

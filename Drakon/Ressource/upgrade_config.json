@@ -1,0 +1,66 @@
+{
+    "medalDefinitions": [
+        {
+            "id": "baby_medal",
+            "title": "Pyro Medal",
+            "icon": "evolution_drakon_baby",
+            "characterId": "character_drakon_baby"
+        },
+        {
+            "id": "rookie_medal",
+            "title": "Blazion Medal",
+            "icon": "evolution_drakon_rookie",
+            "characterId": "character_drakon_rookie"
+        },
+        {
+            "id": "advanced_medal",
+            "title": "Infernon Medal",
+            "icon": "evolution_drakon_advanced",
+            "characterId": "character_drakon_advanced"
+        },
+        {
+            "id": "imperial_medal",
+            "title": "Solarion Medal",
+            "icon": "evolution_drakon_imperial",
+            "characterId": "character_drakon_imperial"
+        }
+    ],
+    "starCosts": [
+        {
+            "fromStar": 1,
+            "toStar": 2,
+            "medals": 20,
+            "coins": 100
+        },
+        {
+            "fromStar": 2,
+            "toStar": 3,
+            "medals": 45,
+            "coins": 250
+        },
+        {
+            "fromStar": 3,
+            "toStar": 4,
+            "medals": 90,
+            "coins": 600
+        },
+        {
+            "fromStar": 4,
+            "toStar": 5,
+            "medals": 160,
+            "coins": 1200
+        },
+        {
+            "fromStar": 5,
+            "toStar": 6,
+            "medals": 260,
+            "coins": 2200
+        },
+        {
+            "fromStar": 6,
+            "toStar": 7,
+            "medals": 420,
+            "coins": 4000
+        }
+    ]
+}

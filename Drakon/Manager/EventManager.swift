@@ -1,0 +1,158 @@
+//
+//  EventManager.swift
+//  Drakon
+//
+//  Created by Tufan Cakir on 28.02.26.
+//
+
+import Combine  // ⭐ hinzufügen
+import Foundation
+
+class EventManager: ObservableObject {  // ⭐ hinzufügen
+
+    static let shared = EventManager()
+
+    @Published var events: [GameEvent] = []  // ⭐ wichtig !!
+    @Published var categories: [EventCategoryInfo] = []  // ⭐ NEU
+
+    func load() {
+        do {
+            let root: EventRoot = try JSONLoader.load("events")
+            events = root.events
+            categories = root.categories
+            print("Loaded Events:", events.count)
+        } catch {
+            print(error)
+        }
+    }
+
+    func crystalMultiplier() -> Double {
+
+        activeEvents()
+            .compactMap { $0.modifiers?.crystalMultiplier }
+            .reduce(1.0, *)
+    }
+
+    func coinMultiplier() -> Double {
+
+        activeEvents()
+            .compactMap { $0.modifiers?.coinMultiplier }
+            .reduce(1.0, *)
+    }
+
+    func title(for category: EventCategory) -> String {
+        categories.first { $0.id == category.rawValue }?.title
+            ?? category.rawValue.capitalized
+    }
+
+    private func seededShuffle(_ events: [GameEvent]) -> [GameEvent] {
+        var generator = SeededGenerator(seed: currentRotationIndex())
+        return events.shuffled(using: &generator)
+    }
+
+    struct SeededGenerator: RandomNumberGenerator {
+        private var state: UInt64
+
+        init(seed: Int) {
+            self.state = UInt64(seed)
+        }
+
+        mutating func next() -> UInt64 {
+            state = 2_862_933_555_777_941_757 &* state &+ 3_037_000_493
+            return state
+        }
+    }
+
+    func events(for category: EventCategory, mode: HomeMode) -> [GameEvent] {
+
+        let filtered = activeEvents()
+            .filter {
+                $0.category == category && $0.mode.rawValue == mode.rawValue  // ⭐ KEY FIX
+            }
+
+        let shuffled = seededShuffle(filtered)
+
+        if category == .boss {
+            let featured = shuffled.first
+            let rest = Array(shuffled.dropFirst())
+
+            return [featured].compactMap { $0 }
+                + rotatedEvents(from: rest, count: 2)
+        }
+
+        return rotatedEvents(from: shuffled, count: 3)
+    }
+
+    var bossEvents: [GameEvent] {
+        events(for: .boss, mode: .island)
+    }
+
+    var storyEvents: [GameEvent] {
+        events(for: .story, mode: .island)
+    }
+
+    var specialEvents: [GameEvent] {
+        events(for: .special, mode: .island)
+    }
+
+    var buffEvents: [GameEvent] {
+        events(for: .buff, mode: .island)
+    }
+
+    func expMultiplier() -> Double {
+
+        activeEvents()
+            .compactMap {
+                $0.modifiers?.expMultiplier
+            }
+            .reduce(1.0, *)
+    }
+
+    func activeEvents() -> [GameEvent] {
+        let now = Date()
+
+        return events.filter { event in
+            if let startString = event.startDate,
+                let endString = event.endDate
+            {
+
+                let formatter = ISO8601DateFormatter()
+
+                guard let start = formatter.date(from: startString),
+                    let end = formatter.date(from: endString)
+                else { return false }
+
+                return now >= start && now <= end
+            }
+
+            // ❗ Alle ohne Datum sind grundsätzlich "pool events"
+            return true
+        }
+    }
+
+    private func currentRotationIndex() -> Int {
+        let startDate = Date(timeIntervalSince1970: 1_700_000_000)  // FIX GLOBAL START
+        let days =
+            Calendar.current.dateComponents([.day], from: startDate, to: Date())
+            .day ?? 0
+        return days / 7
+    }
+
+    private func rotatedEvents(from events: [GameEvent], count: Int = 3)
+        -> [GameEvent]
+    {
+        guard !events.isEmpty else { return [] }
+
+        let rotation = currentRotationIndex()
+        let startIndex = (rotation * count) % events.count
+
+        var result: [GameEvent] = []
+
+        for i in 0..<min(count, events.count) {
+            let index = (startIndex + i) % events.count
+            result.append(events[index])
+        }
+
+        return result
+    }
+}

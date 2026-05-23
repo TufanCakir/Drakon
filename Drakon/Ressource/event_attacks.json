@@ -1,0 +1,36 @@
+{
+    "attacks": [
+        {
+            "id": "firestorm",
+            "title": "Firestorm",
+            "icon": "evolution_drakon_imperial",
+            "power": 95,
+            "energyCost": 0,
+            "element": "fire"
+        },
+        {
+            "id": "fireburst",
+            "title": "Fireburst",
+            "icon": "evolution_drakon_rookie",
+            "power": 58,
+            "energyCost": 0,
+            "element": "fire"
+        },
+        {
+            "id": "blade_core",
+            "title": "Blade Core",
+            "icon": "evolution_drakon_baby",
+            "power": 72,
+            "energyCost": 0,
+            "element": "blade"
+        },
+        {
+            "id": "royal_break",
+            "title": "Royal Break",
+            "icon": "evolution_drakon_advanced",
+            "power": 84,
+            "energyCost": 0,
+            "element": "blade"
+        }
+    ]
+}

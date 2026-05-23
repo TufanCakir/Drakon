@@ -1,0 +1,310 @@
+//
+//  GameLayout.swift
+//  Drakon
+//
+//  Created by Tufan Cakir on 22.03.26.
+//
+
+import SwiftUI
+
+struct GameLayout<Content: View>: View {
+    @Binding var selectedTab: RootView.Tab
+    let content: Content
+
+    init(
+        selectedTab: Binding<RootView.Tab>,
+        @ViewBuilder content: () -> Content
+    ) {
+        self._selectedTab = selectedTab
+        self.content = content()
+    }
+
+    var body: some View {
+        ZStack {
+            DrakonScreenBackground()
+
+            VStack(spacing: 10) {
+                GlobalGameHeader()
+                    .padding(.horizontal, 14)
+                    .padding(.top, 10)
+
+                NavigationStack {
+                    content
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+
+                GlobalGameFooter(selectedTab: $selectedTab)
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 8)
+            }
+        }
+        .ignoresSafeArea(.keyboard)
+    }
+}
+
+private struct GlobalGameHeader: View {
+    @ObservedObject private var coins = CoinManager.shared
+    @ObservedObject private var gems = GemManager.shared
+    @ObservedObject private var rubies = RubyManager.shared
+    @ObservedObject private var eventCurrency = EventCurrencyManager.shared
+    @ObservedObject private var draken = DrakenManager.shared
+    @ObservedObject private var progress = PlayerProgressManager.shared
+
+    private var rank: Int {
+        max(1, ((progress.level - 1) / 10) + 1)
+    }
+
+    private var expRatio: Double {
+        guard progress.requiredEXP > 0 else { return 0 }
+        return min(1, Double(progress.exp) / Double(progress.requiredEXP))
+    }
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 12) {
+                RemoteAssetImage(name: "drakon_icon")
+                    .scaledToFit()
+                    .frame(width: 42, height: 42)
+
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(spacing: 8) {
+                        Text("LV \(progress.level)")
+                            .font(
+                                .system(
+                                    size: 20,
+                                    weight: .black,
+                                    design: .rounded
+                                )
+                            )
+                            .foregroundStyle(.white)
+
+                        Text("RANK \(rank)")
+                            .font(
+                                .system(
+                                    size: 11,
+                                    weight: .black,
+                                    design: .rounded
+                                )
+                            )
+                            .foregroundStyle(DrakonBladePalette.black)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(DrakonBladePalette.gold)
+                            .clipShape(
+                                DrakonBladeShape(pointDepth: 8, slant: 5)
+                            )
+                    }
+
+                    ProgressView(value: expRatio)
+                        .progressViewStyle(.linear)
+                        .tint(DrakonBladePalette.gold)
+                        .scaleEffect(x: 1, y: 1.35, anchor: .center)
+                }
+
+                Spacer(minLength: 8)
+            }
+
+            LazyVGrid(
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
+                spacing: 8
+            ) {
+                resourceCell(
+                    title: "COINS",
+                    value: coins.coins,
+                    icon: "icon_drakon_coin",
+                    tint: DrakonBladePalette.gold
+                )
+                resourceCell(
+                    title: "GEMS",
+                    value: gems.gems,
+                    icon: "icon_drakon_gem",
+                    tint: DrakonBladePalette.blue
+                )
+                resourceCell(
+                    title: "RUBY",
+                    value: rubies.rubies,
+                    icon: "icon_drakon_ruby",
+                    tint: .red
+                )
+                resourceCell(
+                    title: "EVENT",
+                    value: eventCurrency.tokens,
+                    icon: "icon_drakon_shard",
+                    tint: DrakonBladePalette.gold
+                )
+                resourceCell(
+                    title: "DRAKEN",
+                    value: draken.draken,
+                    icon: "icon_draken",
+                    tint: DrakonBladePalette.blue
+                )
+            }
+        }
+        .padding(12)
+        .background(
+            DrakonBladePalette.panel.opacity(0.96)
+                .overlay(alignment: .trailing) {
+                    RemoteAssetImage(name: "drakon_icon")
+                        .scaledToFit()
+                        .frame(width: 150, height: 150)
+                        .opacity(0.07)
+                        .offset(x: 34)
+                }
+        )
+        .clipShape(DrakonCutRectangle(cut: 18))
+        .overlay(
+            DrakonCutRectangle(cut: 18)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            DrakonBladePalette.gold, DrakonBladePalette.blue,
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    lineWidth: 2
+                )
+        )
+    }
+
+    private func resourceCell(
+        title: String,
+        value: Int,
+        icon: String,
+        tint: Color
+    ) -> some View {
+        HStack(spacing: 7) {
+            RemoteAssetImage(name: icon)
+                .scaledToFit()
+                .frame(width: 22, height: 22)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.system(size: 8, weight: .black, design: .rounded))
+                    .foregroundStyle(tint)
+                    .lineLimit(1)
+
+                Text("\(value)")
+                    .font(.system(size: 13, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 9)
+        .frame(height: 38)
+        .background(DrakonBladePalette.black.opacity(0.75))
+        .clipShape(DrakonBladeShape(pointDepth: 11, slant: 7))
+        .overlay(
+            DrakonBladeShape(pointDepth: 11, slant: 7)
+                .stroke(tint.opacity(0.85), lineWidth: 1)
+        )
+    }
+}
+
+private struct GlobalGameFooter: View {
+    @Binding var selectedTab: RootView.Tab
+
+    private let items: [FooterItem] = [
+        FooterItem(
+            tab: .home,
+            title: "Home",
+            icon: "icon_house",
+            tint: DrakonBladePalette.gold
+        ),
+        FooterItem(
+            tab: .team,
+            title: "Team",
+            icon: "icon_team",
+            tint: DrakonBladePalette.blue
+        ),
+        FooterItem(
+            tab: .summon,
+            title: "Summon",
+            icon: "icon_summon",
+            tint: DrakonBladePalette.gold
+        ),
+        FooterItem(
+            tab: .shop,
+            title: "Shop",
+            icon: "icon_shop",
+            tint: DrakonBladePalette.blue
+        ),
+        FooterItem(
+            tab: .exchange,
+            title: "Trade",
+            icon: "icon_trade",
+            tint: DrakonBladePalette.gold
+        ),
+    ]
+
+    var body: some View {
+        HStack(spacing: 7) {
+            ForEach(items) { item in
+                Button {
+                    selectedTab = item.tab
+                } label: {
+                    footerItem(item)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(8)
+        .background(DrakonBladePalette.panel.opacity(0.96))
+        .clipShape(DrakonCutRectangle(cut: 16))
+        .overlay(
+            DrakonCutRectangle(cut: 16)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            DrakonBladePalette.gold, DrakonBladePalette.blue,
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    lineWidth: 2
+                )
+        )
+    }
+
+    private func footerItem(_ item: FooterItem) -> some View {
+        let isSelected = selectedTab == item.tab
+
+        return VStack(spacing: 4) {
+            RemoteAssetImage(name: item.icon)
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+
+            Text(item.title)
+                .font(.system(size: 10, weight: .black, design: .rounded))
+                .foregroundStyle(
+                    isSelected ? .white : DrakonBladePalette.mutedText
+                )
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 58)
+        .background(isSelected ? item.tint.opacity(0.28) : Color.clear)
+        .clipShape(DrakonBladeShape(pointDepth: 12, slant: 8))
+        .overlay(
+            DrakonBladeShape(pointDepth: 12, slant: 8)
+                .stroke(
+                    isSelected ? item.tint : .white.opacity(0.08),
+                    lineWidth: isSelected ? 2 : 1
+                )
+        )
+    }
+}
+
+private struct FooterItem: Identifiable {
+    let tab: RootView.Tab
+    let title: String
+    let icon: String
+    let tint: Color
+
+    var id: RootView.Tab { tab }
+}

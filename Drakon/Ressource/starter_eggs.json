@@ -1,0 +1,22 @@
+{
+    "title": "Wähle dein Drakon Ei",
+    "subtitle": "Diese Auswahl ist nur einmal pro Account möglich.",
+    "eggs": [
+        {
+            "id": "starter_baby_egg",
+            "title": "Baby Core",
+            "characterId": "character_drakon_baby",
+            "eggImage": "evolution_drakon_baby",
+            "previewImage": "evolution_drakon_baby",
+            "accentColor": "gold"
+        },
+        {
+            "id": "starter_rookie_egg",
+            "title": "Blazion Core",
+            "characterId": "character_drakon_rookie",
+            "eggImage": "evolution_drakon_rookie",
+            "previewImage": "evolution_drakon_rookie",
+            "accentColor": "blue"
+        }
+    ]
+}

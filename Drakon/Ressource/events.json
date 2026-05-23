@@ -1,0 +1,108 @@
+{
+    "categories": [
+        {
+            "id": "boss",
+            "title": "Boss"
+        },
+        {
+            "id": "story",
+            "title": "Trials"
+        },
+        {
+            "id": "special",
+            "title": "Special"
+        }
+    ],
+    "events": [
+        {
+            "id": "event_blade_rookie",
+            "type": "boss",
+            "category": "boss",
+            "mode": "island",
+            "title": "Blazion Blade Clash",
+            "description": "Event Kampf mit aktiven Spezialattacken.",
+            "icon": "evolution_drakon_rookie",
+            "battleBackground": "drakon_icon",
+            "bossEnemy": "drakon_rookie_shadow",
+            "bossLevelId": "event_blade_rookie",
+            "enemyElement": "nature",
+            "targetStages": 5,
+            "durationDays": 7,
+            "rewards": {
+                "coins": 300,
+                "gems": 2,
+                "exp": 120,
+                "eventToken": 180,
+                "draken": 1200,
+                "eggs": [
+                    {
+                        "eggId": "egg_drakon_baby_fire",
+                        "amount": 1
+                    }
+                ],
+                "medalId": "baby_medal",
+                "medals": 25
+            }
+        },
+        {
+            "id": "event_advanced_trial",
+            "type": "boss",
+            "category": "story",
+            "mode": "island",
+            "title": "Infernon Trial",
+            "description": "Besiege Infernon und farme Ruby.",
+            "icon": "evolution_drakon_advanced",
+            "battleBackground": "drakon_icon",
+            "bossEnemy": "drakon_advanced_shadow",
+            "bossLevelId": "event_advanced_trial",
+            "enemyElement": "fire",
+            "targetStages": 6,
+            "durationDays": 7,
+            "rewards": {
+                "coins": 450,
+                "gems": 3,
+                "exp": 180,
+                "eventToken": 240,
+                "draken": 160,
+                "eggs": [
+                    {
+                        "eggId": "egg_drakon_baby_fire",
+                        "amount": 1
+                    }
+                ],
+                "medalId": "advanced_medal",
+                "medals": 30
+            }
+        },
+        {
+            "id": "event_imperial_skin_hunt",
+            "type": "skin",
+            "category": "special",
+            "mode": "island",
+            "title": "Solarion Skin Hunt",
+            "description": "Event Waehrung für Skin-Shop sammeln.",
+            "icon": "evolution_drakon_imperial",
+            "battleBackground": "drakon_icon",
+            "bossEnemy": "evolution_drakon_imperial",
+            "bossLevelId": "event_imperial_skin_hunt",
+            "enemyElement": "dark",
+            "targetStages": 7,
+            "durationDays": 7,
+            "rewards": {
+                "coins": 700,
+                "gems": 5,
+                "exp": 260,
+                "eventToken": 420,
+                "draken": 220,
+                "eggs": [
+                    {
+                        "eggId": "egg_drakon_baby_fire",
+                        "amount": 2
+                    }
+                ],
+                "medalId": "imperial_medal",
+                "medals": 40
+            }
+        }
+    ]
+}

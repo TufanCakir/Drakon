@@ -1,0 +1,42 @@
+[
+    {
+        "id": "launch_ruby_pack",
+        "title": "Launch Ruby Pack",
+        "icon": "drakon_icon",
+        "type": "ruby",
+        "amount": 25,
+        "note": "Premium Ruby fuer Summons und Shop."
+    },
+    {
+        "id": "launch_event_tokens",
+        "title": "Event Token Pack",
+        "icon": "evolution_drakon_rookie",
+        "type": "eventCurrency",
+        "amount": 150,
+        "note": "Event Waehrung fuer Drakon Skins."
+    },
+    {
+        "id": "launch_coins",
+        "title": "Blade Coins",
+        "icon": "evolution_drakon_baby",
+        "type": "coins",
+        "amount": 500,
+        "note": "Upgrade Coins fuer den Idle Battle."
+    },
+    {
+        "id": "launch_skin_imperial_gold",
+        "title": "Solarion Gold Skin",
+        "icon": "evolution_drakon_imperial",
+        "type": "skin",
+        "skinId": "imperial_gold",
+        "note": "Skin unlock fuer Solarion."
+    },
+    {
+        "id": "launch_rookie_drakon",
+        "title": "Blazion",
+        "icon": "evolution_drakon_rookie",
+        "type": "drakon",
+        "characterId": "character_drakon_rookie",
+        "note": "Direkter Drakon fuer dein Team."
+    }
+]

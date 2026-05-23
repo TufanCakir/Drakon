@@ -1,0 +1,9 @@
+{
+    "team": {
+        "maxActiveTeamSize": 4
+    },
+    "starterSelection": {
+        "requiredForNewAccount": true,
+        "selectionCount": 1
+    }
+}

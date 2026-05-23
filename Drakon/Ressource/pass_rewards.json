@@ -1,0 +1,48 @@
+{
+    "id": "babypass_s1",
+    "title": "BabyPass",
+    "icon": "evolution_drakon_baby",
+    "currencyTitle": "BabyPass XP",
+    "pointsPerTier": 100,
+    "tiers": [
+        {
+            "tier": 1,
+            "free": {
+                "title": "100 Coins",
+                "type": "coins",
+                "amount": 100
+            },
+            "premium": {
+                "title": "20 Ruby",
+                "type": "ruby",
+                "amount": 20
+            }
+        },
+        {
+            "tier": 2,
+            "free": {
+                "title": "80 Event",
+                "type": "eventCurrency",
+                "amount": 80
+            },
+            "premium": {
+                "title": "Blazion",
+                "type": "drakon",
+                "characterId": "character_drakon_rookie"
+            }
+        },
+        {
+            "tier": 3,
+            "free": {
+                "title": "Baby EXP",
+                "type": "exp",
+                "amount": 150
+            },
+            "premium": {
+                "title": "Gold Skin",
+                "type": "skin",
+                "skinId": "imperial_gold"
+            }
+        }
+    ]
+}
