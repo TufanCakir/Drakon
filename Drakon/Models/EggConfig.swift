@@ -20,6 +20,9 @@ struct DrakonEgg: Codable, Identifiable, Hashable {
     let hatchCostDraken: Int
     let rarity: CharacterRarity
     let element: String?
+    let isLimited: Bool?
+    let startDate: String?
+    let endDate: String?
     let description: String?
 }
 

@@ -1,84 +1,74 @@
 [
     {
-        "id": "starter_pack",
+        "id": "starter_gems_pack",
         "category": {
             "id": "starter",
-            "icon": "diamond.fill",
-            "color": "purple"
+            "icon": "icon_drakon_gem",
+            "color": "blue"
         },
         "gems": 100,
-        "tag": "best_value",
+        "tag": "starter",
         "oneTimePurchase": true
     },
     {
+        "id": "starter_ruby_pack",
+        "category": {
+            "id": "starter",
+            "icon": "icon_drakon_ruby",
+            "color": "red"
+        },
+        "rubies": 30,
+        "tag": "ruby",
+        "oneTimePurchase": true
+    },
+    {
+        "id": "draken_hatch_pack",
+        "category": {
+            "id": "hatchery",
+            "icon": "icon_draken",
+            "color": "blue"
+        },
+        "draken": 250,
+        "tag": "hatch"
+    },
+    {
+        "id": "shard_pack",
+        "category": {
+            "id": "shards",
+            "icon": "icon_drakon_shard",
+            "color": "yellow"
+        },
+        "shards": 500,
+        "tag": "summon"
+    },
+    {
+        "id": "event_token_pack",
+        "category": {
+            "id": "event",
+            "icon": "icon_drakon_shard",
+            "color": "yellow"
+        },
+        "eventCurrency": 500,
+        "tag": "event"
+    },
+    {
         "id": "gems_pack_50",
-        "storeProductId": "com.valtasia.gems.50",
+        "storeProductId": "com.drakon.gems.50",
         "category": {
             "id": "real_money",
-            "icon": "diamond.fill",
-            "color": "cyan"
+            "icon": "icon_drakon_gem",
+            "color": "blue"
         },
         "gems": 50
     },
     {
-        "id": "gems_pack_100",
-        "storeProductId": "com.valtasia.gems.100",
+        "id": "ruby_pack_50",
+        "storeProductId": " ",
         "category": {
             "id": "real_money",
-            "icon": "diamond.fill",
-            "color": "cyan"
+            "icon": "icon_drakon_ruby",
+            "color": "red"
         },
-        "gems": 100
-    },
-    {
-        "id": "gems_pack_300",
-        "storeProductId": "com.valtasia.gems.300",
-        "category": {
-            "id": "real_money",
-            "icon": "diamond.fill",
-            "color": "cyan"
-        },
-        "gems": 300
-    },
-    {
-        "id": "starter_pack",
-        "category": {
-            "id": "starter",
-            "icon": "diamond.fill",
-            "color": "green"
-        },
-        "corruptedGems": 50,
-        "tag": "best_value",
-        "oneTimePurchase": true
-    },
-    {
-        "id": "corrupted_pack_50",
-        "storeProductId": "com.valtasia.cgems.50",
-        "category": {
-            "id": "real_money",
-            "icon": "diamond.fill",
-            "color": "green"
-        },
-        "corruptedGems": 50
-    },
-    {
-        "id": "corrupted_pack_100",
-        "storeProductId": "com.valtasia.cgems.100",
-        "category": {
-            "id": "real_money",
-            "icon": "diamond.fill",
-            "color": "green"
-        },
-        "corruptedGems": 100,
-    },
-    {
-        "id": "corrupted_pack_300",
-        "storeProductId": "com.valtasia.cgems.300",
-        "category": {
-            "id": "real_money",
-            "icon": "diamond.fill",
-            "color": "green"
-        },
-        "corruptedGems": 300,
+        "rubies": 50
     }
 ]

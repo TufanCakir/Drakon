@@ -2,7 +2,7 @@
 //  WardrobeView.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 24.05.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
@@ -133,12 +133,38 @@ struct WardrobeView: View {
                             .system(size: 8, weight: .black, design: .rounded)
                         )
                         .foregroundStyle(skin.rarity.color)
+
+                    if skin.isEventLimited == true {
+                        Text("EVENT")
+                            .font(
+                                .system(
+                                    size: 8,
+                                    weight: .black,
+                                    design: .rounded
+                                )
+                            )
+                            .foregroundStyle(DrakonBladePalette.black)
+                            .padding(.horizontal, 7)
+                            .frame(height: 20)
+                            .background(DrakonBladePalette.gold)
+                            .clipShape(
+                                DrakonBladeShape(pointDepth: 7, slant: 4)
+                            )
+                    }
                 }
 
                 Text((skin.description ?? skin.source ?? "Skin").uppercased())
                     .font(.system(size: 10, weight: .black, design: .rounded))
                     .foregroundStyle(DrakonBladePalette.mutedText)
                     .lineLimit(2)
+
+                if skin.isEventLimited == true {
+                    Text(countdownText(endDate: skin.endDate).uppercased())
+                        .font(
+                            .system(size: 10, weight: .black, design: .rounded)
+                        )
+                        .foregroundStyle(DrakonBladePalette.gold)
+                }
 
                 Button {
                     skinInventory.equip(skin)
@@ -179,6 +205,21 @@ struct WardrobeView: View {
                     lineWidth: equipped ? 2 : 1.4
                 )
         )
+    }
+
+    private func countdownText(endDate: String?) -> String {
+        guard let endDate = date(from: endDate) else { return "Permanent" }
+        let seconds = max(0, Int(endDate.timeIntervalSinceNow))
+        if seconds == 0 { return "Ended" }
+        let days = seconds / 86_400
+        let hours = (seconds % 86_400) / 3_600
+        if days > 0 { return "\(days)d \(hours)h left" }
+        let minutes = (seconds % 3_600) / 60
+        return "\(hours)h \(minutes)m left"
+    }
+
+    private func date(from string: String?) -> Date? {
+        DrakonDateParser.date(from: string)
     }
 }
 

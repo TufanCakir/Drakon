@@ -69,7 +69,7 @@ struct RemoteLoadingView: View {
                     tint: DrakonBladePalette.gold
                 ) {
                     remote.downloadAll {
-                        appModel.appState = .start
+                        continueAfterServiceCheck()
                     }
                 }
 
@@ -78,7 +78,7 @@ struct RemoteLoadingView: View {
                     tint: DrakonBladePalette.blue
                 ) {
                     remote.preload {
-                        appModel.appState = .start
+                        continueAfterServiceCheck()
                     }
                 }
             }
@@ -99,8 +99,16 @@ struct RemoteLoadingView: View {
         guard remote.hasCompleteCache else { return }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            appModel.appState = .start
+            continueAfterServiceCheck()
         }
+    }
+
+    private func continueAfterServiceCheck() {
+        ServiceStatusManager.shared.refresh()
+        appModel.appState =
+            ServiceStatusManager.shared.activeMaintenance == nil
+            ? .start
+            : .maintenance
     }
 
     private func actionButton(

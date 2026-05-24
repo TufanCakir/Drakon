@@ -2,7 +2,7 @@
 //  GameEvent.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 28.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 struct GameEvent: Codable, Identifiable, Hashable {
@@ -21,6 +21,8 @@ struct GameEvent: Codable, Identifiable, Hashable {
     var startDate: String?
     var endDate: String?
     var durationDays: Int?
+    var storyText: String?
+    var difficultyIds: [String]?
     var bossEnemy: String?
     var bossLevelId: String?
     var enemyElement: String?
@@ -34,6 +36,7 @@ struct EventRewards: Codable, Hashable {
 
     var coins: Int?
     var gems: Int?
+    var ruby: Int?
     var exp: Int?
     var eventToken: Int?
     var draken: Int?

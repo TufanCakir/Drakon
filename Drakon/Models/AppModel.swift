@@ -2,7 +2,7 @@
 //  AppModel.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import Combine
@@ -42,6 +42,8 @@ final class AppModel: ObservableObject {
     @Published var selectedTab: RootView.Tab = .home
 
     @Published var selectedLevelId: String?
+    @Published var selectedStoryChapter: StoryChapter?
+    @Published var selectedBattleDifficulty: BattleDifficulty?
     // MARK: - Loading Overlay
     @Published var isTransitionLoading: Bool = false
     @Published var currentLoadingImage: String = "loading1"
@@ -68,6 +70,7 @@ final class AppModel: ObservableObject {
 
     enum AppState {
         case remoteLoading
+        case maintenance
         case start
         case tutorial
         case starterSelection
@@ -164,6 +167,30 @@ final class AppModel: ObservableObject {
     }
 
     func startBattle() {
+        selectedStoryChapter = nil
+        selectedBattleDifficulty = nil
+        appState = hasChosenStarter ? .game : .starterSelection
+    }
+
+    func startStoryBattle(
+        chapter: StoryChapter,
+        difficulty: BattleDifficulty
+    ) {
+        EventRuntime.shared.clear()
+        selectedStoryChapter = chapter
+        selectedBattleDifficulty = difficulty
+        selectedLevelId = chapter.id
+        appState = hasChosenStarter ? .game : .starterSelection
+    }
+
+    func startEventBattle(
+        event: GameEvent,
+        difficulty: BattleDifficulty
+    ) {
+        selectedStoryChapter = nil
+        selectedBattleDifficulty = difficulty
+        EventRuntime.shared.activate(event)
+        selectedLevelId = event.bossLevelId ?? event.id
         appState = hasChosenStarter ? .game : .starterSelection
     }
 
@@ -205,8 +232,16 @@ final class AppModel: ObservableObject {
             "events",
             "event_attacks",
             "gifts",
+            "pass_index",
             "pass_rewards",
+            "launchpass",
+            "starterpass",
+            "rookiepass",
+            "advancedpass",
+            "imperialpass",
             "daily_rewards",
+            "service_status",
+            "news",
             "upgrade_config",
             "eggs",
             "skins",
@@ -270,6 +305,7 @@ final class AppModel: ObservableObject {
         PlayerProgressManager.shared.reset()
         PityManager.shared.resetAll()
         RubyManager.shared.reset()
+        ShardManager.shared.reset()
         EventCurrencyManager.shared.reset()
         DrakenManager.shared.reset()
         EggInventoryManager.shared.reset()

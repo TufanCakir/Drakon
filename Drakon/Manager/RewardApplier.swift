@@ -25,12 +25,10 @@ enum RewardApplier {
             GemManager.shared.add(amount)
         case .exp:
             PlayerProgressManager.shared.addEXP(amount)
-        case .corruptedCoins:
-            CorruptedCoinManager.shared.add(amount)
-        case .corruptedGems:
-            CorruptedGemManager.shared.add(amount)
         case .ruby:
             RubyManager.shared.add(amount)
+        case .shards:
+            ShardManager.shared.add(amount)
         case .eventCurrency:
             EventCurrencyManager.shared.add(amount)
         case .draken:

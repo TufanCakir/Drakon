@@ -5,5 +5,87 @@
     "starterSelection": {
         "requiredForNewAccount": true,
         "selectionCount": 1
-    }
+    },
+    "battleDifficulties": [
+        {
+            "id": "normal",
+            "title": "Normal",
+            "enemyHpMultiplier": 1.0,
+            "rewardMultiplier": 1.0
+        },
+        {
+            "id": "hard",
+            "title": "Hard",
+            "enemyHpMultiplier": 1.45,
+            "rewardMultiplier": 1.35
+        },
+        {
+            "id": "legend",
+            "title": "Legend",
+            "enemyHpMultiplier": 2.1,
+            "rewardMultiplier": 1.8
+        }
+    ],
+    "storyChapters": [
+        {
+            "id": "story_pyro_awakening",
+            "title": "Pyro Awakening",
+            "description":
+                "Pyro folgt einer Feuer-Spur und stellt sich dem ersten Schatten.",
+            "icon": "evolution_drakon_baby",
+            "enemyImage": "evolution_drakon_rookie",
+            "enemyElement": "nature",
+            "storyText":
+                "Pyro spuert eine fremde Energie im alten Krater. Jeder Sieg bringt ihn naeher an seine erste echte Form.",
+            "targetStages": 5,
+            "rewards": {
+                "coins": 500,
+                "gems": 5,
+                "exp": 180,
+                "draken": 120,
+                "medalId": "baby_medal",
+                "medals": 20
+            }
+        },
+        {
+            "id": "story_blazion_trial",
+            "title": "Blazion Trial",
+            "description":
+                "Blazion kaempft gegen Wasserwellen und lernt Kontrolle.",
+            "icon": "evolution_drakon_rookie",
+            "enemyImage": "evolution_drakon_advanced",
+            "enemyElement": "water",
+            "storyText":
+                "Die Arena kuehlt ab. Blazion muss jeden Angriff sauber setzen, sonst erstickt seine Flamme.",
+            "targetStages": 6,
+            "rewards": {
+                "coins": 850,
+                "gems": 8,
+                "exp": 260,
+                "draken": 180,
+                "medalId": "rookie_medal",
+                "medals": 24
+            }
+        },
+        {
+            "id": "story_solarion_oath",
+            "title": "Solarion Oath",
+            "description": "Solarion prueft die Kraft der ganzen Linie.",
+            "icon": "evolution_drakon_imperial",
+            "enemyImage": "evolution_drakon_imperial",
+            "enemyElement": "dark",
+            "storyText":
+                "Solarion steht vor der letzten Pruefung. Licht und Dunkelheit treffen frontal aufeinander.",
+            "targetStages": 7,
+            "rewards": {
+                "coins": 1400,
+                "gems": 12,
+                "ruby": 5,
+                "exp": 420,
+                "draken": 260,
+                "medalId": "imperial_medal",
+                "medals": 30
+            }
+        }
+    ]
 }

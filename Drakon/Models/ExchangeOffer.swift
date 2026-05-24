@@ -2,7 +2,7 @@
 //  ExchangeOffer.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 28.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 struct ExchangeOffer: Codable, Identifiable {
@@ -13,10 +13,6 @@ struct ExchangeOffer: Codable, Identifiable {
     // 🟡 NORMAL
     let coinCost: Int?
     let gemReward: Int?
-
-    // 🟢 CORRUPTED
-    let corruptedCoinCost: Int?
-    let corruptedGemReward: Int?
 
     let purchaseLimit: Int
 }

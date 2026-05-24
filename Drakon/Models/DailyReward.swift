@@ -2,7 +2,7 @@
 //  DailyReward.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 06.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import Foundation
@@ -12,10 +12,11 @@ struct DailyReward: Codable, Identifiable {
 
     let coins: Int?
     let gems: Int?
+    let ruby: Int?
+    let draken: Int?
+    let shards: Int?
+    let eventCurrency: Int?
     let exp: Int?
-
-    let corruptedCoins: Int?
-    let corruptedGems: Int?
 
     var id: Int { day }
 }

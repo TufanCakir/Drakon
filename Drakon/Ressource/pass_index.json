@@ -1,0 +1,28 @@
+{
+    "passes": [
+        {
+            "id": "launchpass_s1",
+            "file": "launchpass"
+        },
+        {
+            "id": "starterpass_s1",
+            "file": "starterpass"
+        },
+        {
+            "id": "babypass_s1",
+            "file": "pass_rewards"
+        },
+        {
+            "id": "rookiepass_s1",
+            "file": "rookiepass"
+        },
+        {
+            "id": "advancedpass_s1",
+            "file": "advancedpass"
+        },
+        {
+            "id": "imperialpass_s1",
+            "file": "imperialpass"
+        }
+    ]
+}

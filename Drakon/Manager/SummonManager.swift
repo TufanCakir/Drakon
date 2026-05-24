@@ -2,7 +2,7 @@
 //  SummonManager.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import Combine
@@ -10,7 +10,7 @@ import Foundation
 
 final class SummonManager: ObservableObject {
 
-    static let shared = SummonManager()  // 👈 HINZUFÜGEN
+    static let shared = SummonManager()
 
     // MARK: - Published
 

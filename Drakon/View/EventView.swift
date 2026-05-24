@@ -2,7 +2,7 @@
 //  EventView.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 28.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
@@ -14,6 +14,8 @@ struct EventView: View {
     @State private var selectedCategory: EventCategory = .boss
     @State private var infoEvent: GameEvent?
     @State private var upgradeConfig = UpgradeConfigLoader.load()
+    @State private var gameConfig = GameConfigManager.shared.config
+    @State private var selectedDifficultyId = "normal"
 
     private var events: [GameEvent] {
         eventManager.events(for: selectedCategory, mode: .island)
@@ -44,6 +46,9 @@ struct EventView: View {
         .onAppear {
             eventManager.load()
             upgradeConfig = UpgradeConfigLoader.load()
+            gameConfig = GameConfigManager.shared.config
+            selectedDifficultyId =
+                gameConfig.battleDifficulties.first?.id ?? "normal"
         }
         .sheet(item: $infoEvent) { event in
             eventInfoSheet(event)
@@ -113,6 +118,16 @@ struct EventView: View {
                     .clipShape(DrakonCutRectangle(cut: 12))
 
                 VStack(alignment: .leading, spacing: 5) {
+                    HStack(spacing: 6) {
+                        eventBadge(event.category.rawValue.uppercased())
+                        if event.type == "skin" {
+                            eventBadge("SKIN EVENT")
+                        }
+                        if event.rewards?.eggs?.isEmpty == false {
+                            eventBadge("EGG DROP")
+                        }
+                    }
+
                     Text(event.title.uppercased())
                         .font(
                             .system(size: 17, weight: .black, design: .rounded)
@@ -126,6 +141,13 @@ struct EventView: View {
                         )
                         .foregroundStyle(DrakonBladePalette.mutedText)
                         .lineLimit(2)
+
+                    Text(countdownText(for: event).uppercased())
+                        .font(
+                            .system(size: 10, weight: .black, design: .rounded)
+                        )
+                        .foregroundStyle(DrakonBladePalette.gold)
+                        .lineLimit(1)
                 }
 
                 Spacer()
@@ -146,6 +168,15 @@ struct EventView: View {
             }
 
             rewardStrip(event)
+
+            difficultyRow(event)
+
+            if let storyText = event.storyText {
+                Text(storyText)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.78))
+                    .lineLimit(3)
+            }
 
             Button {
                 start(event)
@@ -173,19 +204,79 @@ struct EventView: View {
         .clipShape(DrakonBladeShape(pointDepth: 32, slant: 14))
     }
 
+    private func eventBadge(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 8, weight: .black, design: .rounded))
+            .foregroundStyle(DrakonBladePalette.black)
+            .padding(.horizontal, 7)
+            .frame(height: 20)
+            .background(DrakonBladePalette.gold)
+            .clipShape(DrakonBladeShape(pointDepth: 7, slant: 4))
+    }
+
+    private func difficultyRow(_ event: GameEvent) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(difficulties(for: event)) { difficulty in
+                    let selected = selectedDifficultyId == difficulty.id
+
+                    Button {
+                        selectedDifficultyId = difficulty.id
+                    } label: {
+                        Text(difficulty.title.uppercased())
+                            .font(
+                                .system(
+                                    size: 10,
+                                    weight: .black,
+                                    design: .rounded
+                                )
+                            )
+                            .foregroundStyle(
+                                selected ? DrakonBladePalette.black : .white
+                            )
+                            .padding(.horizontal, 12)
+                            .frame(height: 32)
+                            .background(
+                                selected
+                                    ? DrakonBladePalette.gold
+                                    : DrakonBladePalette.black.opacity(0.62)
+                            )
+                            .clipShape(
+                                DrakonBladeShape(pointDepth: 11, slant: 7)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
     private func rewardStrip(_ event: GameEvent) -> some View {
         HStack(spacing: 7) {
             rewardChip(
                 "COINS",
                 event.rewards?.coins,
-                icon: "evolution_drakon_baby"
+                icon: "icon_drakon_coin"
             )
             rewardChip(
-                "RUBY",
+                "GEMS",
                 event.rewards?.gems,
-                icon: "evolution_drakon_rookie"
+                icon: "icon_drakon_gem"
             )
-            rewardChip("EVENT", event.rewards?.eventToken, icon: "drakon_icon")
+            rewardChip("RUBY", event.rewards?.ruby, icon: "icon_drakon_ruby")
+            rewardChip(
+                "EVENT",
+                event.rewards?.eventToken,
+                icon: "icon_drakon_shard"
+            )
+            rewardChip("DRAKEN", event.rewards?.draken, icon: "icon_draken")
+            if let egg = event.rewards?.eggs?.first {
+                DrakonRewardChip(
+                    title: "EGG",
+                    value: egg.amount,
+                    icon: "egg_drakon_fire"
+                )
+            }
             if let medals = event.rewards?.medals,
                 let medal = medalDefinition(for: event.rewards?.medalId)
             {
@@ -233,12 +324,24 @@ struct EventView: View {
                     )
                     .font(.system(size: 11, weight: .black, design: .rounded))
                     .foregroundStyle(DrakonBladePalette.gold)
+
+                    Text(countdownText(for: event).uppercased())
+                        .font(
+                            .system(size: 10, weight: .black, design: .rounded)
+                        )
+                        .foregroundStyle(DrakonBladePalette.blue)
                 }
             }
 
             Text(event.description ?? "Event Battle")
                 .font(.system(size: 13, weight: .bold, design: .rounded))
                 .foregroundStyle(DrakonBladePalette.mutedText)
+
+            if let storyText = event.storyText {
+                Text(storyText)
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.78))
+            }
 
             if let medal = medalDefinition(for: event.rewards?.medalId),
                 let medals = event.rewards?.medals
@@ -263,9 +366,44 @@ struct EventView: View {
     }
 
     private func start(_ event: GameEvent) {
-        EventRuntime.shared.activate(event)
-        appModel.selectedLevelId = event.bossLevelId ?? event.id
-        appModel.appState = .game
+        appModel.startEventBattle(
+            event: event,
+            difficulty: selectedDifficulty(for: event)
+        )
+    }
+
+    private func difficulties(for event: GameEvent) -> [BattleDifficulty] {
+        let all =
+            gameConfig.battleDifficulties.isEmpty
+            ? GameConfig.fallback.battleDifficulties
+            : gameConfig.battleDifficulties
+        guard let ids = event.difficultyIds, !ids.isEmpty else { return all }
+        let filtered = all.filter { ids.contains($0.id) }
+        return filtered.isEmpty ? all : filtered
+    }
+
+    private func selectedDifficulty(for event: GameEvent) -> BattleDifficulty {
+        difficulties(for: event).first { $0.id == selectedDifficultyId }
+            ?? difficulties(for: event)[0]
+    }
+
+    private func countdownText(for event: GameEvent) -> String {
+        guard let endDate = date(from: event.endDate) else {
+            return "Permanent"
+        }
+
+        let seconds = max(0, Int(endDate.timeIntervalSinceNow))
+        if seconds == 0 { return "Ended" }
+
+        let days = seconds / 86_400
+        let hours = (seconds % 86_400) / 3_600
+        if days > 0 { return "\(days)d \(hours)h left" }
+        let minutes = (seconds % 3_600) / 60
+        return "\(hours)h \(minutes)m left"
+    }
+
+    private func date(from string: String?) -> Date? {
+        DrakonDateParser.date(from: string)
     }
 }
 

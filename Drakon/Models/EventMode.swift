@@ -2,10 +2,9 @@
 //  EventMode.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 25.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 enum EventMode: String, Codable {
     case island
-    case corrupted
 }

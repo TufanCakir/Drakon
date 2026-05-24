@@ -102,6 +102,24 @@ struct HatcheryView: View {
                     .frame(width: 76, height: 76)
 
                 VStack(alignment: .leading, spacing: 6) {
+                    if egg.isLimited == true {
+                        Text(countdownText(endDate: egg.endDate).uppercased())
+                            .font(
+                                .system(
+                                    size: 9,
+                                    weight: .black,
+                                    design: .rounded
+                                )
+                            )
+                            .foregroundStyle(DrakonBladePalette.black)
+                            .padding(.horizontal, 8)
+                            .frame(height: 22)
+                            .background(DrakonBladePalette.gold)
+                            .clipShape(
+                                DrakonBladeShape(pointDepth: 8, slant: 5)
+                            )
+                    }
+
                     Text(egg.title.uppercased())
                         .font(
                             .system(size: 16, weight: .black, design: .rounded)
@@ -266,6 +284,21 @@ struct HatcheryView: View {
         )
         .padding(24)
         .background(.black.opacity(0.72))
+    }
+
+    private func countdownText(endDate: String?) -> String {
+        guard let endDate = date(from: endDate) else { return "Permanent Egg" }
+        let seconds = max(0, Int(endDate.timeIntervalSinceNow))
+        if seconds == 0 { return "Ended" }
+        let days = seconds / 86_400
+        let hours = (seconds % 86_400) / 3_600
+        if days > 0 { return "Limited \(days)d \(hours)h" }
+        let minutes = (seconds % 3_600) / 60
+        return "Limited \(hours)h \(minutes)m"
+    }
+
+    private func date(from string: String?) -> Date? {
+        DrakonDateParser.date(from: string)
     }
 }
 

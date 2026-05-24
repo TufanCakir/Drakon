@@ -9,10 +9,22 @@ import SwiftUI
 
 enum DrakonBladePalette {
     static let black = Color(red: 0.018, green: 0.018, blue: 0.022)
+
     static let panel = Color(red: 0.055, green: 0.058, blue: 0.068)
     static let panelLight = Color(red: 0.085, green: 0.088, blue: 0.102)
+
+    // Core
     static let gold = Color(red: 0.95, green: 0.72, blue: 0.18)
     static let blue = Color(red: 0.08, green: 0.24, blue: 0.62)
+    static let red = Color(red: 0.82, green: 0.16, blue: 0.22)
+
+    // Added resource colors
+    static let emerald = Color(red: 0.10, green: 0.78, blue: 0.48)
+    static let violet = Color(red: 0.55, green: 0.34, blue: 0.92)
+    static let cyan = Color(red: 0.12, green: 0.82, blue: 0.92)
+    static let amber = Color(red: 1.00, green: 0.58, blue: 0.10)
+    static let crimson = Color(red: 0.88, green: 0.20, blue: 0.30)
+
     static let mutedText = Color.white.opacity(0.62)
 }
 

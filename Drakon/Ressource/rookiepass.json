@@ -1,0 +1,22 @@
+{
+    "id": "rookiepass_s1",
+    "title": "RookiePass",
+    "icon": "evolution_drakon_rookie",
+    "currencyTitle": "Rookie XP",
+    "pointsPerTier": 110,
+    "tiers": [
+        {
+            "tier": 1,
+            "free": {
+                "title": "Rookie Medals",
+                "type": "eventCurrency",
+                "amount": 120
+            },
+            "premium": {
+                "title": "Blazion",
+                "type": "drakon",
+                "characterId": "character_drakon_rookie"
+            }
+        }
+    ]
+}

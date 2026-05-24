@@ -1,0 +1,36 @@
+{
+    "id": "starterpass_s1",
+    "title": "StarterPass",
+    "icon": "egg_drakon_fire",
+    "currencyTitle": "Starter XP",
+    "pointsPerTier": 90,
+    "tiers": [
+        {
+            "tier": 1,
+            "free": {
+                "title": "Pyro Egg",
+                "type": "egg",
+                "eggId": "egg_drakon_baby_fire",
+                "amount": 1
+            },
+            "premium": {
+                "title": "250 Draken",
+                "type": "draken",
+                "amount": 250
+            }
+        },
+        {
+            "tier": 2,
+            "free": {
+                "title": "150 Gems",
+                "type": "gems",
+                "amount": 150
+            },
+            "premium": {
+                "title": "Pyro",
+                "type": "drakon",
+                "characterId": "character_drakon_baby"
+            }
+        }
+    ]
+}

@@ -21,15 +21,16 @@ struct MenuView: View {
                 Spacer(minLength: 4)
 
                 VStack(spacing: 9) {
-                    menuButton(
-                        title: "Battle starten",
-                        image: "evolution_drakon_baby",
-                        tint: gold
-                    ) {
-                        appModel.navigateWithLoading {
-                            appModel.startBattle()
-                        }
+                    NavigationLink {
+                        StorySelectionView()
+                    } label: {
+                        bladeLink(
+                            title: "Story Battle",
+                            image: "evolution_drakon_baby",
+                            tint: gold
+                        )
                     }
+                    .buttonStyle(.plain)
 
                     smallMenuButton(
                         title: "Upgrade",
@@ -102,16 +103,27 @@ struct MenuView: View {
                         .buttonStyle(.plain)
 
                         NavigationLink {
-                            SettingsView()
+                            NewsView()
                         } label: {
                             smallBladeLink(
-                                title: "Settings",
-                                image: "evolution_drakon_imperial",
+                                title: "News",
+                                image: "evolution_drakon_baby",
                                 tint: blue
                             )
                         }
                         .buttonStyle(.plain)
                     }
+
+                    NavigationLink {
+                        SettingsView()
+                    } label: {
+                        bladeLink(
+                            title: "Settings",
+                            image: "evolution_drakon_imperial",
+                            tint: blue
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 Spacer(minLength: 8)

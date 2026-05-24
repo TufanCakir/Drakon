@@ -2,7 +2,7 @@
 //  TransitionLoadingView.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 07.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI

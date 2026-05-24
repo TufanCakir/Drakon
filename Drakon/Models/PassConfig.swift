@@ -7,6 +7,15 @@
 
 import Foundation
 
+struct PassIndex: Codable {
+    let passes: [PassIndexEntry]
+}
+
+struct PassIndexEntry: Codable, Identifiable, Hashable {
+    let id: String
+    let file: String
+}
+
 struct PassConfig: Codable, Identifiable {
     let id: String
     let title: String
@@ -34,11 +43,24 @@ struct PassReward: Codable, Hashable {
 }
 
 enum PassLoader {
-    static func load() -> PassConfig? {
+    static func loadAll() -> [PassConfig] {
         do {
-            return try JSONLoader.load("pass_rewards")
+            let index: PassIndex = try JSONLoader.load("pass_index")
+            return index.passes.compactMap { load($0.file) }
         } catch {
-            print("pass_rewards.json konnte nicht geladen werden:", error)
+            if let legacy = load("pass_rewards") {
+                return [legacy]
+            }
+            print("pass_index.json konnte nicht geladen werden:", error)
+            return []
+        }
+    }
+
+    static func load(_ file: String) -> PassConfig? {
+        do {
+            return try JSONLoader.load(file)
+        } catch {
+            print("\(file).json konnte nicht geladen werden:", error)
             return nil
         }
     }

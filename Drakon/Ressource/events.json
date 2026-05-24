@@ -21,6 +21,14 @@
             "mode": "island",
             "title": "Blazion Blade Clash",
             "description": "Event Kampf mit aktiven Spezialattacken.",
+            "startDate": "24.05.2026 00:00",
+            "endDate": "07.06.2026 23:59",
+            "storyText":
+                "Blazion wird von einer Klingen-Aura herausgefordert. Spezialattacken brechen den Schild schneller.",
+            "difficultyIds": [
+                "normal",
+                "hard"
+            ],
             "icon": "evolution_drakon_rookie",
             "battleBackground": "drakon_icon",
             "bossEnemy": "drakon_rookie_shadow",
@@ -31,6 +39,7 @@
             "rewards": {
                 "coins": 300,
                 "gems": 2,
+                "ruby": 1,
                 "exp": 120,
                 "eventToken": 180,
                 "draken": 1200,
@@ -51,6 +60,15 @@
             "mode": "island",
             "title": "Infernon Trial",
             "description": "Besiege Infernon und farme Ruby.",
+            "startDate": "24.05.2026 00:00",
+            "endDate": "14.06.2026 23:59",
+            "storyText":
+                "Infernon wartet in der Flammenhalle. Nur saubere Element-Vorteile halten dich lange genug am Leben.",
+            "difficultyIds": [
+                "normal",
+                "hard",
+                "legend"
+            ],
             "icon": "evolution_drakon_advanced",
             "battleBackground": "drakon_icon",
             "bossEnemy": "drakon_advanced_shadow",
@@ -61,6 +79,7 @@
             "rewards": {
                 "coins": 450,
                 "gems": 3,
+                "ruby": 2,
                 "exp": 180,
                 "eventToken": 240,
                 "draken": 160,
@@ -81,6 +100,14 @@
             "mode": "island",
             "title": "Solarion Skin Hunt",
             "description": "Event Waehrung für Skin-Shop sammeln.",
+            "startDate": "24.05.2026 00:00",
+            "endDate": "21.06.2026 23:59",
+            "storyText":
+                "Solarion Gold Skins tauchen nur waehrend dieses Events auf. Farm Tokens und seltene Eier.",
+            "difficultyIds": [
+                "hard",
+                "legend"
+            ],
             "icon": "evolution_drakon_imperial",
             "battleBackground": "drakon_icon",
             "bossEnemy": "evolution_drakon_imperial",
@@ -91,6 +118,7 @@
             "rewards": {
                 "coins": 700,
                 "gems": 5,
+                "ruby": 3,
                 "exp": 260,
                 "eventToken": 420,
                 "draken": 220,

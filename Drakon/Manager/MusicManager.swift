@@ -2,7 +2,7 @@
 //  MusicManager.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 07.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import AVFoundation
@@ -16,7 +16,7 @@ final class MusicManager: NSObject, ObservableObject {
 
     // MARK: - Published State
     @Published var isMuted: Bool = false
-    @Published var volume: Float = 1.0  // Master Volume (0...1)
+    @Published var volume: Float = 1.0
 
     // MARK: - Keys
     private let volumeKey = "music_volume"

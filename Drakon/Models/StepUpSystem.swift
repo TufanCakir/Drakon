@@ -2,7 +2,7 @@
 //  StepUpSystem.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 08.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 struct StepUpSystem: Codable {
@@ -14,7 +14,7 @@ struct StepUpStep: Codable, Identifiable {
     var id: Int { step }
 
     let step: Int
-    let costs: [SummonOption]?  // 👈 NEU
+    let costs: [SummonOption]?  
     let pool: [SummonPoolEntry]?
     let guaranteed: GuaranteedReward?
 }

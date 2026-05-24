@@ -11,49 +11,75 @@ import Foundation
 final class PassProgressManager: ObservableObject {
     static let shared = PassProgressManager()
 
-    @Published private(set) var points: Int = 0
+    @Published private(set) var pointsByPass: [String: Int] = [:]
     @Published private(set) var claimedRewardIds: Set<String> = []
 
-    private let pointsKey = "drakon_pass_points"
+    private let pointsKey = "drakon_pass_points_by_pass"
     private let claimedKey = "drakon_pass_claimed"
 
     private init() {
-        points = UserDefaults.standard.integer(forKey: pointsKey)
+        pointsByPass =
+            UserDefaults.standard.dictionary(forKey: pointsKey)
+            as? [String: Int]
+            ?? [:]
         claimedRewardIds = Set(
             UserDefaults.standard.stringArray(forKey: claimedKey) ?? []
         )
     }
 
-    func addPoints(_ amount: Int) {
-        points += max(0, amount)
+    func addPoints(_ amount: Int, passId: String = "babypass_s1") {
+        pointsByPass[passId, default: 0] += max(0, amount)
         save()
     }
 
-    func canClaim(tier: Int, pointsPerTier: Int, lane: String) -> Bool {
-        points >= tier * pointsPerTier && !isClaimed(tier: tier, lane: lane)
+    func addPointsToAllPasses(_ amount: Int) {
+        let passIds = PassLoader.loadAll().map(\.id)
+        let targets = passIds.isEmpty ? ["babypass_s1"] : passIds
+        for passId in targets {
+            pointsByPass[passId, default: 0] += max(0, amount)
+        }
+        save()
     }
 
-    func isClaimed(tier: Int, lane: String) -> Bool {
-        claimedRewardIds.contains(rewardId(tier: tier, lane: lane))
+    func points(for passId: String) -> Int {
+        pointsByPass[passId] ?? 0
     }
 
-    func claim(tier: Int, lane: String) {
-        claimedRewardIds.insert(rewardId(tier: tier, lane: lane))
+    func canClaim(
+        passId: String,
+        tier: Int,
+        pointsPerTier: Int,
+        lane: String
+    ) -> Bool {
+        points(for: passId) >= tier * pointsPerTier
+            && !isClaimed(passId: passId, tier: tier, lane: lane)
+    }
+
+    func isClaimed(passId: String, tier: Int, lane: String) -> Bool {
+        claimedRewardIds.contains(
+            rewardId(passId: passId, tier: tier, lane: lane)
+        )
+    }
+
+    func claim(passId: String, tier: Int, lane: String) {
+        claimedRewardIds.insert(
+            rewardId(passId: passId, tier: tier, lane: lane)
+        )
         save()
     }
 
     func reset() {
-        points = 0
+        pointsByPass = [:]
         claimedRewardIds.removeAll()
         save()
     }
 
-    private func rewardId(tier: Int, lane: String) -> String {
-        "\(lane)_\(tier)"
+    private func rewardId(passId: String, tier: Int, lane: String) -> String {
+        "\(passId)_\(lane)_\(tier)"
     }
 
     private func save() {
-        UserDefaults.standard.set(points, forKey: pointsKey)
+        UserDefaults.standard.set(pointsByPass, forKey: pointsKey)
         UserDefaults.standard.set(Array(claimedRewardIds), forKey: claimedKey)
     }
 }

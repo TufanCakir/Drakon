@@ -2,7 +2,7 @@
 //  JSONLoader.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import Foundation
@@ -108,7 +108,12 @@ final class JSONLoader {
         guard
             let url = Bundle.main.url(forResource: file, withExtension: "json")
         else {
-            fatalError("JSON file not found locally or remotely: \(file).json")
+            throw CocoaError(
+                .fileNoSuchFile,
+                userInfo: [
+                    NSFilePathErrorKey: "\(file).json"
+                ]
+            )
         }
 
         return try Data(contentsOf: url)

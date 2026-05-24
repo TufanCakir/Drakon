@@ -2,13 +2,14 @@
 //  GameLayout.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 22.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
 
 struct GameLayout<Content: View>: View {
     @Binding var selectedTab: RootView.Tab
+
     let content: Content
 
     init(
@@ -28,11 +29,11 @@ struct GameLayout<Content: View>: View {
                     .padding(.horizontal, 14)
                     .padding(.top, 10)
 
-                NavigationStack {
-                    content
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped()
+                content
+
+                    .id(selectedTab)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
 
                 GlobalGameFooter(selectedTab: $selectedTab)
                     .padding(.horizontal, 14)
@@ -49,6 +50,7 @@ private struct GlobalGameHeader: View {
     @ObservedObject private var rubies = RubyManager.shared
     @ObservedObject private var eventCurrency = EventCurrencyManager.shared
     @ObservedObject private var draken = DrakenManager.shared
+    @ObservedObject private var shards = ShardManager.shared
     @ObservedObject private var progress = PlayerProgressManager.shared
 
     private var rank: Int {
@@ -103,6 +105,8 @@ private struct GlobalGameHeader: View {
                 }
 
                 Spacer(minLength: 8)
+
+                drakenPill
             }
 
             LazyVGrid(
@@ -115,29 +119,33 @@ private struct GlobalGameHeader: View {
                     icon: "icon_drakon_coin",
                     tint: DrakonBladePalette.gold
                 )
+
                 resourceCell(
                     title: "GEMS",
                     value: gems.gems,
                     icon: "icon_drakon_gem",
-                    tint: DrakonBladePalette.blue
+                    tint: DrakonBladePalette.cyan
                 )
+
                 resourceCell(
                     title: "RUBY",
                     value: rubies.rubies,
                     icon: "icon_drakon_ruby",
-                    tint: .red
+                    tint: DrakonBladePalette.crimson
                 )
+
+                resourceCell(
+                    title: "SHARDS",
+                    value: shards.shards,
+                    icon: "icon_drakon_shard",
+                    tint: DrakonBladePalette.violet
+                )
+
                 resourceCell(
                     title: "EVENT",
                     value: eventCurrency.tokens,
-                    icon: "icon_drakon_shard",
-                    tint: DrakonBladePalette.gold
-                )
-                resourceCell(
-                    title: "DRAKEN",
-                    value: draken.draken,
-                    icon: "icon_draken",
-                    tint: DrakonBladePalette.blue
+                    icon: "icon_draken_container",
+                    tint: DrakonBladePalette.emerald
                 )
             }
         }
@@ -165,6 +173,34 @@ private struct GlobalGameHeader: View {
                     ),
                     lineWidth: 2
                 )
+        )
+    }
+
+    private var drakenPill: some View {
+        HStack(spacing: 7) {
+            RemoteAssetImage(name: "icon_draken")
+                .scaledToFit()
+                .frame(width: 28, height: 28)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text("DRAKEN")
+                    .font(.system(size: 8, weight: .black, design: .rounded))
+                    .foregroundStyle(DrakonBladePalette.amber)
+
+                Text("\(draken.draken)")
+                    .font(.system(size: 15, weight: .black, design: .rounded))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 42)
+        .background(DrakonBladePalette.black.opacity(0.82))
+        .clipShape(DrakonBladeShape(pointDepth: 12, slant: 8))
+        .overlay(
+            DrakonBladeShape(pointDepth: 12, slant: 8)
+                .stroke(DrakonBladePalette.blue, lineWidth: 1.4)
         )
     }
 
@@ -219,25 +255,25 @@ private struct GlobalGameFooter: View {
             tab: .team,
             title: "Team",
             icon: "icon_team",
-            tint: DrakonBladePalette.blue
+            tint: DrakonBladePalette.cyan
         ),
         FooterItem(
             tab: .summon,
             title: "Summon",
             icon: "icon_summon",
-            tint: DrakonBladePalette.gold
+            tint: DrakonBladePalette.violet
         ),
         FooterItem(
             tab: .shop,
             title: "Shop",
             icon: "icon_shop",
-            tint: DrakonBladePalette.blue
+            tint: DrakonBladePalette.emerald
         ),
         FooterItem(
             tab: .exchange,
             title: "Trade",
             icon: "icon_trade",
-            tint: DrakonBladePalette.gold
+            tint: DrakonBladePalette.crimson
         ),
     ]
 
@@ -273,10 +309,17 @@ private struct GlobalGameFooter: View {
     private func footerItem(_ item: FooterItem) -> some View {
         let isSelected = selectedTab == item.tab
 
-        return VStack(spacing: 4) {
+        return VStack(spacing: 5) {
             RemoteAssetImage(name: item.icon)
                 .scaledToFit()
-                .frame(width: 30, height: 30)
+                .frame(
+                    width: isSelected ? 38 : 32,
+                    height: isSelected ? 38 : 32
+                )
+                .shadow(
+                    color: isSelected ? item.tint.opacity(0.45) : .clear,
+                    radius: 8
+                )
 
             Text(item.title)
                 .font(.system(size: 10, weight: .black, design: .rounded))
@@ -287,16 +330,34 @@ private struct GlobalGameFooter: View {
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 58)
-        .background(isSelected ? item.tint.opacity(0.28) : Color.clear)
+        .frame(height: 72)
+        .background(
+            isSelected
+                ? AnyShapeStyle(
+                    LinearGradient(
+                        colors: [
+                            item.tint.opacity(0.34),
+                            item.tint.opacity(0.14),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                : AnyShapeStyle(Color.clear)
+        )
         .clipShape(DrakonBladeShape(pointDepth: 12, slant: 8))
         .overlay(
             DrakonBladeShape(pointDepth: 12, slant: 8)
                 .stroke(
-                    isSelected ? item.tint : .white.opacity(0.08),
-                    lineWidth: isSelected ? 2 : 1
+                    isSelected
+                        ? item.tint
+                        : .white.opacity(0.08),
+                    lineWidth: isSelected ? 2.2 : 1
                 )
         )
+        .scaleEffect(isSelected ? 1.02 : 1)
+        .animation(.easeOut(duration: 0.16), value: isSelected)
+        .offset(y: -2)
     }
 }
 

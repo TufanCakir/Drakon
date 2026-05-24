@@ -2,10 +2,9 @@
 //  HomeMode.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 17.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 enum HomeMode: String {
     case island
-    case corrupted
 }

@@ -1,0 +1,22 @@
+{
+    "id": "advancedpass_s1",
+    "title": "AdvancedPass",
+    "icon": "evolution_drakon_advanced",
+    "currencyTitle": "Advanced XP",
+    "pointsPerTier": 130,
+    "tiers": [
+        {
+            "tier": 1,
+            "free": {
+                "title": "150 Shards",
+                "type": "shards",
+                "amount": 150
+            },
+            "premium": {
+                "title": "Infernon",
+                "type": "drakon",
+                "characterId": "character_drakon_advanced"
+            }
+        }
+    ]
+}

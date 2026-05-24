@@ -2,7 +2,7 @@
 //  CharacterRarity.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
@@ -13,7 +13,6 @@ enum CharacterRarity: String, Codable {
     case rare
     case epic
     case legendary
-    case corrupted
 }
 
 extension CharacterRarity {
@@ -25,7 +24,6 @@ extension CharacterRarity {
         case .rare: return .blue
         case .epic: return .purple
         case .legendary: return .yellow
-        case .corrupted: return .green
         }
     }
 
@@ -36,7 +34,6 @@ extension CharacterRarity {
         case .rare: return 1.065
         case .epic: return 1.085
         case .legendary: return 1.11  // leicht stärker gemacht
-        case .corrupted: return 1.18  // 🔥 Endgame tier
         }
     }
 
@@ -47,7 +44,6 @@ extension CharacterRarity {
         case .rare: return 0.25  // 25%
         case .epic: return 0.08  // 8%
         case .legendary: return 0.015  // 1.5%
-        case .corrupted: return 0.005  // 0.5%
         }
     }
 }

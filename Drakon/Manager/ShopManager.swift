@@ -2,7 +2,7 @@
 //  ShopManager.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import StoreKit
@@ -43,7 +43,7 @@ class ShopManager {
         }
 
         return storeProducts.sorted {
-            ($0.shopItem.gems ?? 0) < ($1.shopItem.gems ?? 0)
+            $0.shopItem.rewardAmount < $1.shopItem.rewardAmount
         }
     }
 }

@@ -183,10 +183,10 @@
                 "requiredPulls": 80,
                 "guaranteedPool": [
                     {
-                        "characterId": "evolution_drakon_rookie"
+                        "characterId": "character_drakon_rookie"
                     },
                     {
-                        "characterId": "evolution_drakon_rookie"
+                        "characterId": "character_drakon_rookie"
                     }
                 ]
             }

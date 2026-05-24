@@ -1,0 +1,35 @@
+{
+    "id": "launchpass_s1",
+    "title": "LaunchPass",
+    "icon": "drakon_icon",
+    "currencyTitle": "Launch XP",
+    "pointsPerTier": 80,
+    "tiers": [
+        {
+            "tier": 1,
+            "free": {
+                "title": "500 Coins",
+                "type": "coins",
+                "amount": 500
+            },
+            "premium": {
+                "title": "50 Ruby",
+                "type": "ruby",
+                "amount": 50
+            }
+        },
+        {
+            "tier": 2,
+            "free": {
+                "title": "100 Shards",
+                "type": "shards",
+                "amount": 100
+            },
+            "premium": {
+                "title": "Solarion Gold",
+                "type": "skin",
+                "skinId": "imperial_gold"
+            }
+        }
+    ]
+}

@@ -2,7 +2,7 @@
 //  SkinConfig.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 24.05.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import Foundation
@@ -18,6 +18,9 @@ struct DrakonSkinDefinition: Codable, Identifiable, Hashable {
     let image: String
     let rarity: CharacterRarity
     let source: String?
+    let isEventLimited: Bool?
+    let startDate: String?
+    let endDate: String?
     let description: String?
 }
 

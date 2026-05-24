@@ -2,7 +2,7 @@
 //  PityManager.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 08.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import Foundation

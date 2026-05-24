@@ -35,6 +35,8 @@ struct DrakonApp: App {
                         switch appModel.appState {
                         case .remoteLoading:
                             RemoteLoadingView()
+                        case .maintenance:
+                            MaintenanceView()
                         case .start:
                             StartView()
                         case .tutorial:
@@ -65,6 +67,7 @@ struct DrakonApp: App {
             .environmentObject(CoinManager.shared)
             .environmentObject(GemManager.shared)
             .environmentObject(DrakenManager.shared)
+            .environmentObject(ShardManager.shared)
             .environmentObject(EggInventoryManager.shared)
             .environmentObject(PlayerProgressManager.shared)
             .environmentObject(eventManager)
@@ -92,7 +95,8 @@ struct DrakonApp: App {
             switch state {
             case .game, .home:
                 MusicManager.shared.play()
-            case .remoteLoading, .start, .tutorial, .starterSelection:
+            case .remoteLoading, .maintenance, .start, .tutorial,
+                .starterSelection:
                 MusicManager.shared.stop()
             }
         }

@@ -2,7 +2,7 @@
 //  SummonView.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
@@ -294,17 +294,14 @@ struct SummonView: View {
             return CoinManager.shared.spend(amount)
         case "gem", "gems":
             return GemManager.shared.spend(amount)
-        case "c_gem", "corrupted_gem", "corrupted_gems", "shard", "shards":
-            return CorruptedGemManager.shared.spend(amount)
+        case "shard", "shards":
+            return ShardManager.shared.spend(amount)
         case "ruby", "rubies":
             return RubyManager.shared.spend(amount)
         case "draken":
             return DrakenManager.shared.spend(amount)
         case "event_token", "event_tokens", "event":
-            guard EventCurrencyManager.shared.spend(amount) else {
-                return false
-            }
-            return true
+            return EventCurrencyManager.shared.spend(amount)
         default:
             return false
         }
@@ -318,7 +315,7 @@ struct SummonView: View {
             return ("COINS", "icon_drakon_coin")
         case "gem", "gems":
             return ("GEMS", "icon_drakon_gem")
-        case "c_gem", "corrupted_gem", "corrupted_gems", "shard", "shards":
+        case "shard", "shards":
             return ("SHARDS", "icon_drakon_shard")
         case "ruby", "rubies":
             return ("RUBY", "icon_drakon_ruby")

@@ -2,7 +2,7 @@
 //  ShopView.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import StoreKit
@@ -123,14 +123,10 @@ struct ShopView: View {
 
     private func productCard(_ storeProduct: StoreProduct) -> some View {
         let item = storeProduct.shopItem
-        let amount = item.gems ?? item.corruptedGems ?? 0
-        let image =
-            item.corruptedGems == nil
-            ? "evolution_drakon_rookie" : "evolution_drakon_imperial"
         let price = storeProduct.product?.displayPrice ?? "FREE"
 
         return VStack(spacing: 12) {
-            RemoteAssetImage(name: image)
+            RemoteAssetImage(name: item.rewardIcon)
                 .scaledToFit()
                 .frame(height: 92)
 
@@ -143,7 +139,7 @@ struct ShopView: View {
             .foregroundStyle(gold)
             .lineLimit(1)
 
-            Text("\(amount) GEMS")
+            Text("\(item.rewardAmount) \(item.rewardTitle)")
                 .font(.system(size: 17, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
                 .lineLimit(1)
@@ -225,8 +221,11 @@ struct ShopView: View {
 
     private func grantItem(_ item: ShopItem) {
         if let gems = item.gems { GemManager.shared.add(gems) }
-        if let corruptedGems = item.corruptedGems {
-            CorruptedGemManager.shared.add(corruptedGems)
+        if let rubies = item.rubies { RubyManager.shared.add(rubies) }
+        if let draken = item.draken { DrakenManager.shared.add(draken) }
+        if let shards = item.shards { ShardManager.shared.add(shards) }
+        if let eventCurrency = item.eventCurrency {
+            EventCurrencyManager.shared.add(eventCurrency)
         }
 
         if item.oneTimePurchase == true {

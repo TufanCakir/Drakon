@@ -8,6 +8,14 @@
         "note": "Premium Ruby fuer Summons und Shop."
     },
     {
+        "id": "launch_shards",
+        "title": "Summon Shards",
+        "icon": "icon_drakon_shard",
+        "type": "shards",
+        "amount": 120,
+        "note": "Shard Waehrung fuer Shard Summon Banner."
+    },
+    {
         "id": "launch_event_tokens",
         "title": "Event Token Pack",
         "icon": "evolution_drakon_rookie",

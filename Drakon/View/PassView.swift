@@ -11,19 +11,25 @@ struct PassView: View {
     @EnvironmentObject private var appModel: AppModel
     @ObservedObject private var progress = PassProgressManager.shared
 
-    @State private var config = PassLoader.load()
+    @State private var passes = PassLoader.loadAll()
+    @State private var selectedPassId: String?
+
+    private var selectedPass: PassConfig? {
+        passes.first { $0.id == selectedPassId } ?? passes.first
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 header
+                passSelector
 
-                if let config {
+                if let config = selectedPass {
                     ForEach(config.tiers) { tier in
                         tierRow(tier, config: config)
                     }
                 } else {
-                    Text("pass_rewards.json fehlt")
+                    Text("Keine Pass JSON geladen")
                         .font(
                             .system(size: 15, weight: .bold, design: .rounded)
                         )
@@ -37,27 +43,69 @@ struct PassView: View {
         }
         .scrollIndicators(.hidden)
         .background(DrakonScreenBackground())
-        .navigationTitle("BabyPass")
+        .navigationTitle("Passes")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            config = PassLoader.load()
+            passes = PassLoader.loadAll()
+            selectedPassId = selectedPassId ?? passes.first?.id
         }
     }
 
     private var header: some View {
         HStack(spacing: 14) {
-            RemoteAssetImage(name: config?.icon ?? "drakon_icon")
+            RemoteAssetImage(name: selectedPass?.icon ?? "drakon_icon")
                 .scaledToFit()
                 .frame(width: 70, height: 70)
 
             VStack(alignment: .leading, spacing: 5) {
-                Text((config?.title ?? "BABYPASS").uppercased())
+                Text((selectedPass?.title ?? "PASSES").uppercased())
                     .font(.system(size: 26, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
 
-                Text("PROGRESS \(progress.points)")
+                Text("PROGRESS \(progress.points(for: selectedPass?.id ?? ""))")
                     .font(.system(size: 12, weight: .black, design: .rounded))
                     .foregroundStyle(DrakonBladePalette.gold)
+            }
+        }
+    }
+
+    private var passSelector: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(passes) { pass in
+                    let selected = selectedPass?.id == pass.id
+
+                    Button {
+                        selectedPassId = pass.id
+                    } label: {
+                        HStack(spacing: 7) {
+                            RemoteAssetImage(name: pass.icon)
+                                .scaledToFit()
+                                .frame(width: 24, height: 24)
+
+                            Text(pass.title.uppercased())
+                                .font(
+                                    .system(
+                                        size: 10,
+                                        weight: .black,
+                                        design: .rounded
+                                    )
+                                )
+                        }
+                        .foregroundStyle(
+                            selected ? DrakonBladePalette.black : .white
+                        )
+                        .padding(.horizontal, 12)
+                        .frame(height: 40)
+                        .background(
+                            selected
+                                ? DrakonBladePalette.gold
+                                : DrakonBladePalette.panel
+                        )
+                        .clipShape(DrakonBladeShape(pointDepth: 14, slant: 8))
+                    }
+                    .buttonStyle(.plain)
+                }
             }
         }
     }
@@ -98,8 +146,13 @@ struct PassView: View {
         lane: String,
         config: PassConfig
     ) -> some View {
-        let claimed = progress.isClaimed(tier: tier, lane: lane)
+        let claimed = progress.isClaimed(
+            passId: config.id,
+            tier: tier,
+            lane: lane
+        )
         let canClaim = progress.canClaim(
+            passId: config.id,
             tier: tier,
             pointsPerTier: config.pointsPerTier,
             lane: lane
@@ -115,7 +168,7 @@ struct PassView: View {
                 skinId: reward.skinId,
                 teamManager: appModel.teamManager
             )
-            progress.claim(tier: tier, lane: lane)
+            progress.claim(passId: config.id, tier: tier, lane: lane)
         } label: {
             VStack(spacing: 7) {
                 Text(lane.uppercased())

@@ -2,7 +2,7 @@
 //  Gift.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 06.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
@@ -26,9 +26,8 @@ enum GiftType: String, Codable {
     case coins
     case gems
     case exp
-    case corruptedCoins
-    case corruptedGems
     case ruby
+    case shards
     case eventCurrency
     case draken
     case egg

@@ -2,7 +2,7 @@
 //  OwnedCharacter.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import Foundation
@@ -41,10 +41,6 @@ final class OwnedCharacter: Codable, Identifiable {
 
     var isMaxStar: Bool {
         stars >= Self.maxStars
-    }
-
-    var isCorrupted: Bool {
-        stars >= 7
     }
 
     var isAwakened: Bool {

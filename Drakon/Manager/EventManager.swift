@@ -2,18 +2,18 @@
 //  EventManager.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 28.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
-import Combine  // ⭐ hinzufügen
+import Combine
 import Foundation
 
-class EventManager: ObservableObject {  // ⭐ hinzufügen
+class EventManager: ObservableObject {
 
     static let shared = EventManager()
 
-    @Published var events: [GameEvent] = []  // ⭐ wichtig !!
-    @Published var categories: [EventCategoryInfo] = []  // ⭐ NEU
+    @Published var events: [GameEvent] = []
+    @Published var categories: [EventCategoryInfo] = []
 
     func load() {
         do {
@@ -116,10 +116,8 @@ class EventManager: ObservableObject {  // ⭐ hinzufügen
                 let endString = event.endDate
             {
 
-                let formatter = ISO8601DateFormatter()
-
-                guard let start = formatter.date(from: startString),
-                    let end = formatter.date(from: endString)
+                guard let start = DrakonDateParser.date(from: startString),
+                    let end = DrakonDateParser.date(from: endString)
                 else { return false }
 
                 return now >= start && now <= end

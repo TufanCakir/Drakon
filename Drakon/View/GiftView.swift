@@ -2,7 +2,7 @@
 //  GiftView.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 02.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
@@ -108,7 +108,7 @@ struct GiftView: View {
             .overlay(
                 DrakonBladeShape(pointDepth: 28, slant: 14)
                     .stroke(
-                        gift.type == .eventCurrency
+                        gift.type == .eventCurrency || gift.type == .shards
                             ? DrakonBladePalette.blue : DrakonBladePalette.gold,
                         lineWidth: 1.7
                     )

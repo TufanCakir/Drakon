@@ -2,7 +2,7 @@
 //  RootView.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
@@ -12,7 +12,10 @@ struct RootView: View {
     enum Tab: Hashable { case home, team, summon, shop, exchange, upgrade }
 
     @EnvironmentObject var appModel: AppModel
+    @ObservedObject private var dailyRewardManager = DailyRewardManager.shared
     @State private var selectedTab: Tab = .home
+    @State private var showsDailyLogin = false
+    @State private var didPresentDailyLoginThisSession = false
 
     var body: some View {
 
@@ -21,12 +24,30 @@ struct RootView: View {
         }
         .onAppear {
             selectedTab = appModel.selectedTab
+            refreshDailyLogin()
+        }
+        .sheet(isPresented: $showsDailyLogin) {
+            DailyLoginPopupView()
         }
         .onChange(of: selectedTab) { _, tab in
             appModel.selectedTab = tab
+            refreshDailyLogin()
         }
         .onChange(of: appModel.selectedTab) { _, tab in
             selectedTab = tab
+        }
+        .onChange(of: appModel.appState) { _, _ in
+            refreshDailyLogin()
+        }
+    }
+
+    private func refreshDailyLogin() {
+        guard appModel.appState == .home else { return }
+        guard !didPresentDailyLoginThisSession else { return }
+        dailyRewardManager.refreshAvailability()
+        if dailyRewardManager.canClaimToday {
+            showsDailyLogin = true
+            didPresentDailyLoginThisSession = true
         }
     }
 }
@@ -39,7 +60,9 @@ extension RootView {
         switch selectedTab {
 
         case .home:
-            MenuView()
+            NavigationStack {
+                MenuView()
+            }
 
         case .team:
             TeamView(teamManager: appModel.teamManager)

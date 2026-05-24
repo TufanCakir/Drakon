@@ -2,7 +2,7 @@
 //  TeamView.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 27.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
@@ -148,57 +148,87 @@ struct TeamView: View {
         let inTeam = teamManager.isInTeam(owned)
         let tint = inTeam ? gold : blue
 
-        return VStack(spacing: 9) {
-            RemoteAssetImage(
-                name: SkinInventoryManager.shared.activeImage(for: owned.base)
-            )
-            .scaledToFit()
-            .frame(height: 102)
+        return VStack(spacing: 10) {
+            Button {
+                selectedCharacter = owned
+            } label: {
+                VStack(spacing: 9) {
+                    RemoteAssetImage(
+                        name: SkinInventoryManager.shared.activeImage(
+                            for: owned.base
+                        )
+                    )
+                    .scaledToFit()
+                    .frame(height: 102)
 
-            Text(owned.base.name.uppercased())
-                .font(.system(size: 12, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.65)
+                    Text(owned.base.name.uppercased())
+                        .font(
+                            .system(
+                                size: 12,
+                                weight: .black,
+                                design: .rounded
+                            )
+                        )
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.65)
 
-            HStack(spacing: 6) {
-                Text("LV \(owned.level)")
-                RemoteAssetImage(
-                    name: DrakonElement.parse(owned.base.energyType).icon
-                )
-                .scaledToFit()
-                .frame(width: 14, height: 14)
-                Text(DrakonElement.parse(owned.base.energyType).title)
-            }
-            .font(.system(size: 10, weight: .black, design: .rounded))
-            .foregroundStyle(mutedText)
-
-            DrakonStarRow(stars: owned.stars, size: 13)
-
-            Button(inTeam ? "REMOVE" : "ADD") {
-                if inTeam {
-                    if teamManager.activeTeam.count <= 1 {
-                        showTeamWarning = true
-                    } else {
-                        teamManager.removeFromTeam(owned)
+                    HStack(spacing: 6) {
+                        Text("LV \(owned.level)")
+                        RemoteAssetImage(
+                            name: DrakonElement.parse(owned.base.energyType)
+                                .icon
+                        )
+                        .scaledToFit()
+                        .frame(width: 14, height: 14)
+                        Text(DrakonElement.parse(owned.base.energyType).title)
                     }
-                } else {
-                    teamManager.addToTeam(owned)
+                    .font(.system(size: 10, weight: .black, design: .rounded))
+                    .foregroundStyle(mutedText)
+
+                    DrakonStarRow(stars: owned.stars, size: 13)
                 }
             }
-            .font(.system(size: 11, weight: .black, design: .rounded))
-            .foregroundStyle(inTeam ? black : .white)
-            .frame(maxWidth: .infinity)
-            .frame(height: 34)
-            .background(inTeam ? gold : blue)
-            .clipShape(TeamBladeRectangle(cut: 8))
+            .buttonStyle(.plain)
+
+            HStack(spacing: 8) {
+                Button("DETAIL") {
+                    selectedCharacter = owned
+                }
+                .font(.system(size: 10, weight: .black, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 38)
+                .background(black.opacity(0.7))
+                .clipShape(TeamBladeRectangle(cut: 8))
+                .overlay(
+                    TeamBladeRectangle(cut: 8)
+                        .stroke(tint.opacity(0.9), lineWidth: 1)
+                )
+
+                Button(inTeam ? "REMOVE" : "ADD") {
+                    if inTeam {
+                        if teamManager.activeTeam.count <= 1 {
+                            showTeamWarning = true
+                        } else {
+                            teamManager.removeFromTeam(owned)
+                        }
+                    } else {
+                        teamManager.addToTeam(owned)
+                    }
+                }
+                .font(.system(size: 10, weight: .black, design: .rounded))
+                .foregroundStyle(inTeam ? black : .white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 38)
+                .background(inTeam ? gold : blue)
+                .clipShape(TeamBladeRectangle(cut: 8))
+            }
         }
         .padding(12)
         .background(panel)
         .overlay(TeamBladeRectangle(cut: 16).stroke(tint, lineWidth: 1.6))
         .clipShape(TeamBladeRectangle(cut: 16))
-        .contentShape(TeamBladeRectangle(cut: 16))
-        .onTapGesture { selectedCharacter = owned }
     }
 }
 

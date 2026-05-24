@@ -2,7 +2,7 @@
 //  ExchangeManager.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 28.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import Combine
@@ -14,10 +14,8 @@ final class ExchangeManager: ObservableObject {
 
     @Published var offers: [ExchangeOffer] = []
     @Published private(set) var purchasedNormal: [String: Int] = [:]
-    @Published private(set) var purchasedCorrupted: [String: Int] = [:]
 
     private let purchaseKeyNormal = "exchange_purchases_normal"
-    private let purchaseKeyCorrupted = "exchange_purchases_corrupted"
 
     private init() {
         loadOffers()
@@ -25,12 +23,9 @@ final class ExchangeManager: ObservableObject {
     }
 
     // MARK: - Remaining
-    func remaining(_ offer: ExchangeOffer, isCorrupted: Bool) -> Int {
+    func remaining(_ offer: ExchangeOffer) -> Int {
 
-        let bought =
-            isCorrupted
-            ? purchasedCorrupted[offer.id] ?? 0
-            : purchasedNormal[offer.id] ?? 0
+        let bought = purchasedNormal[offer.id] ?? 0
 
         return max(0, offer.purchaseLimit - bought)
     }
@@ -38,7 +33,6 @@ final class ExchangeManager: ObservableObject {
     // MARK: - Reset
     func reset() {
         purchasedNormal = [:]
-        purchasedCorrupted = [:]
         save()
     }
 
@@ -52,42 +46,21 @@ final class ExchangeManager: ObservableObject {
     }
 
     // MARK: - Buy
-    func buy(offer: ExchangeOffer, isCorrupted: Bool) -> Bool {
+    func buy(offer: ExchangeOffer) -> Bool {
 
-        let bought =
-            isCorrupted
-            ? purchasedCorrupted[offer.id] ?? 0
-            : purchasedNormal[offer.id] ?? 0
+        let bought = purchasedNormal[offer.id] ?? 0
 
         guard bought < offer.purchaseLimit else { return false }
 
-        let success: Bool
+        guard let cost = offer.coinCost,
+            let reward = offer.gemReward
+        else { return false }
 
-        if isCorrupted {
+        let success = CoinManager.shared.spend(cost)
 
-            guard let cost = offer.corruptedCoinCost,
-                let reward = offer.corruptedGemReward
-            else { return false }
-
-            success = CorruptedCoinManager.shared.spend(cost)
-
-            if success {
-                CorruptedGemManager.shared.add(reward)
-                purchasedCorrupted[offer.id] = bought + 1
-            }
-
-        } else {
-
-            guard let cost = offer.coinCost,
-                let reward = offer.gemReward
-            else { return false }
-
-            success = CoinManager.shared.spend(cost)
-
-            if success {
-                GemManager.shared.add(reward)
-                purchasedNormal[offer.id] = bought + 1
-            }
+        if success {
+            GemManager.shared.add(reward)
+            purchasedNormal[offer.id] = bought + 1
         }
 
         guard success else { return false }
@@ -99,19 +72,11 @@ final class ExchangeManager: ObservableObject {
     // MARK: - Persistence
     private func save() {
         UserDefaults.standard.set(purchasedNormal, forKey: purchaseKeyNormal)
-        UserDefaults.standard.set(
-            purchasedCorrupted,
-            forKey: purchaseKeyCorrupted
-        )
     }
 
     private func loadPurchases() {
         purchasedNormal =
             UserDefaults.standard.dictionary(forKey: purchaseKeyNormal)
-            as? [String: Int] ?? [:]
-
-        purchasedCorrupted =
-            UserDefaults.standard.dictionary(forKey: purchaseKeyCorrupted)
             as? [String: Int] ?? [:]
     }
 }

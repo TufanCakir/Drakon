@@ -8,8 +8,16 @@
         "events",
         "event_attacks",
         "gifts",
+        "pass_index",
         "pass_rewards",
+        "launchpass",
+        "starterpass",
+        "rookiepass",
+        "advancedpass",
+        "imperialpass",
         "daily_rewards",
+        "service_status",
+        "news",
         "upgrade_config",
         "eggs",
         "skins",
@@ -72,6 +80,10 @@
         {
             "id": "icon_drakon_shard",
             "file": "icon_drakon_shard.png"
+        },
+        {
+            "id": "icon_draken_container",
+            "file": "icon_draken_container.png"
         },
         {
             "id": "icon_draken",

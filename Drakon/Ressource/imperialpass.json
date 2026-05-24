@@ -1,0 +1,22 @@
+{
+    "id": "imperialpass_s1",
+    "title": "ImperialPass",
+    "icon": "evolution_drakon_imperial",
+    "currencyTitle": "Imperial XP",
+    "pointsPerTier": 160,
+    "tiers": [
+        {
+            "tier": 1,
+            "free": {
+                "title": "250 Ruby",
+                "type": "ruby",
+                "amount": 250
+            },
+            "premium": {
+                "title": "Solarion",
+                "type": "drakon",
+                "characterId": "character_drakon_imperial"
+            }
+        }
+    ]
+}

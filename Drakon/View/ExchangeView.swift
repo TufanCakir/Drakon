@@ -2,14 +2,12 @@
 //  ExchangeView.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 28.02.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import SwiftUI
 
 struct ExchangeView: View {
-    @EnvironmentObject private var appModel: AppModel
-
     @StateObject private var exchange = ExchangeManager.shared
     @State private var showFail = false
 
@@ -21,8 +19,6 @@ struct ExchangeView: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            modeSwitch
-
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 14) {
                     ForEach(visibleOffers) { offer in
@@ -53,59 +49,20 @@ struct ExchangeView: View {
     }
 
     private var visibleOffers: [ExchangeOffer] {
-        let corrupted = appModel.homeMode == .corrupted
-        return exchange.offers.filter {
-            corrupted ? $0.corruptedCoinCost != nil : $0.coinCost != nil
-        }
-    }
-
-    private var modeSwitch: some View {
-        HStack(spacing: 10) {
-            modeButton("Normal", .island, gold)
-            modeButton("Corrupt", .corrupted, blue)
-        }
-        .padding(.horizontal, 20)
-    }
-
-    private func modeButton(_ title: String, _ mode: HomeMode, _ tint: Color)
-        -> some View
-    {
-        let active = appModel.homeMode == mode
-
-        return Button {
-            appModel.homeMode = mode
-        } label: {
-            Text(title.uppercased())
-                .font(.system(size: 12, weight: .black, design: .rounded))
-                .foregroundStyle(active ? black : .white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 42)
-                .background(active ? tint : panel)
-                .overlay(
-                    ExchangeBladeRectangle(cut: 10).stroke(tint, lineWidth: 1.5)
-                )
-                .clipShape(ExchangeBladeRectangle(cut: 10))
-        }
-        .buttonStyle(.plain)
+        exchange.offers.filter { $0.coinCost != nil && $0.gemReward != nil }
     }
 
     private func offerCard(_ offer: ExchangeOffer) -> some View {
-        let corrupted = appModel.homeMode == .corrupted
-        let cost =
-            corrupted ? (offer.corruptedCoinCost ?? 0) : (offer.coinCost ?? 0)
-        let reward =
-            corrupted ? (offer.corruptedGemReward ?? 0) : (offer.gemReward ?? 0)
-        let remaining = exchange.remaining(offer, isCorrupted: corrupted)
-        let tint = corrupted ? blue : gold
+        let cost = offer.coinCost ?? 0
+        let reward = offer.gemReward ?? 0
+        let remaining = exchange.remaining(offer)
+        let tint = gold
 
         return VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
-                RemoteAssetImage(
-                    name: corrupted
-                        ? "evolution_drakon_imperial" : "evolution_drakon_baby"
-                )
-                .scaledToFit()
-                .frame(width: 54, height: 54)
+                RemoteAssetImage(name: "icon_drakon_gem")
+                    .scaledToFit()
+                    .frame(width: 54, height: 54)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(offer.title.uppercased())
@@ -126,28 +83,25 @@ struct ExchangeView: View {
 
             HStack(spacing: 12) {
                 tradePill(
-                    image: corrupted
-                        ? "evolution_drakon_imperial" : "evolution_drakon_baby",
+                    image: "icon_drakon_coin",
                     text: "-\(cost)",
                     tint: tint
                 )
                 tradePill(
-                    image: corrupted
-                        ? "evolution_drakon_advanced"
-                        : "evolution_drakon_rookie",
+                    image: "icon_drakon_gem",
                     text: "+\(reward)",
                     tint: tint
                 )
             }
 
             Button {
-                if !exchange.buy(offer: offer, isCorrupted: corrupted) {
+                if !exchange.buy(offer: offer) {
                     showFail = true
                 }
             } label: {
                 Text(remaining == 0 ? "SOLD OUT" : "EXCHANGE")
                     .font(.system(size: 12, weight: .black, design: .rounded))
-                    .foregroundStyle(corrupted ? .white : black)
+                    .foregroundStyle(black)
                     .frame(maxWidth: .infinity)
                     .frame(height: 44)
                     .background(
@@ -228,5 +182,4 @@ private struct ExchangeBladeRectangle: Shape {
 
 #Preview {
     ExchangeView()
-        .environmentObject(AppModel())
 }

@@ -10,9 +10,7 @@ import SwiftUI
 
 struct GameView: View {
     @EnvironmentObject private var appModel: AppModel
-    @ObservedObject private var dailyRewardManager = DailyRewardManager.shared
     @StateObject private var battle = BattleViewModel()
-    @State private var showsDailyLogin = false
     @State private var showsEventAttacks = false
     @State private var eventVictory: EventVictoryResult?
 
@@ -71,6 +69,8 @@ struct GameView: View {
                     self.eventVictory = nil
                     EventRuntime.shared.clear()
                     appModel.selectedLevelId = nil
+                    appModel.selectedStoryChapter = nil
+                    appModel.selectedBattleDifficulty = nil
                     appModel.appState = .home
                 }
                 .zIndex(20)
@@ -85,17 +85,12 @@ struct GameView: View {
             battle.configure(appModel: appModel) { result in
                 eventVictory = result
             }
-            dailyRewardManager.refreshAvailability()
-            showsDailyLogin = dailyRewardManager.canClaimToday
         }
         .onDisappear {
             battle.saveLastSeen()
         }
         .task {
             await battle.runAutoBattle()
-        }
-        .sheet(isPresented: $showsDailyLogin) {
-            DailyLoginPopupView()
         }
         .sheet(isPresented: $showsEventAttacks) {
             eventAttackSheet
@@ -151,6 +146,23 @@ struct GameView: View {
             Text("STAGE \(battle.stage)")
                 .font(.system(size: 22, weight: .black, design: .rounded))
                 .foregroundStyle(DrakonBladePalette.gold)
+
+            if let battleTitle = battle.battleTitle {
+                Text(battleTitle.uppercased())
+                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.76))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+            }
+
+            if let storyText = battle.storyText {
+                Text(storyText)
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundStyle(DrakonBladePalette.mutedText)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .frame(maxWidth: 310)
+            }
 
             RemoteAssetImage(name: battle.enemyImageName)
                 .scaledToFit()
@@ -524,6 +536,8 @@ final class BattleViewModel: ObservableObject {
     @Published var playerPulse = false
     @Published var coins = 0
     @Published var gems = 0
+    @Published var battleTitle: String?
+    @Published var storyText: String?
 
     private weak var appModel: AppModel?
     private var onEventVictory: ((EventVictoryResult) -> Void)?
@@ -547,8 +561,18 @@ final class BattleViewModel: ObservableObject {
             || EventRuntime.shared.activeEvent != nil
     }
 
+    var isStoryBattle: Bool {
+        appModel?.selectedStoryChapter != nil
+    }
+
     var enemyImageName: String {
-        EventRuntime.shared.activeEvent?.icon ?? "evolution_drakon_imperial"
+        if let event = EventRuntime.shared.activeEvent {
+            return event.icon ?? "evolution_drakon_imperial"
+        }
+        if let chapter = appModel?.selectedStoryChapter {
+            return chapter.enemyImage
+        }
+        return "evolution_drakon_imperial"
     }
 
     func configure(
@@ -562,6 +586,12 @@ final class BattleViewModel: ObservableObject {
 
         loadIdleProgress()
         eventAttacks = EventAttackLoader.load()
+        battleTitle =
+            EventRuntime.shared.activeEvent?.title
+            ?? appModel.selectedStoryChapter?.title
+        storyText =
+            EventRuntime.shared.activeEvent?.storyText
+            ?? appModel.selectedStoryChapter?.storyText
         rollNextEvolutionForm()
         claimOfflineRewards()
         spawnEnemy()
@@ -573,7 +603,9 @@ final class BattleViewModel: ObservableObject {
             try? await Task.sleep(
                 nanoseconds: UInt64(autoAttackInterval * 1_000_000_000)
             )
-            guard !Task.isCancelled, !isEventBattle else { continue }
+            guard !Task.isCancelled, !isEventBattle, !isStoryBattle else {
+                continue
+            }
             attackEnemy(isAuto: true)
         }
     }
@@ -655,6 +687,8 @@ final class BattleViewModel: ObservableObject {
     func exitBattle() {
         saveLastSeen()
         appModel?.selectedLevelId = nil
+        appModel?.selectedStoryChapter = nil
+        appModel?.selectedBattleDifficulty = nil
         EventRuntime.shared.clear()
         appModel?.appState = .home
     }
@@ -667,7 +701,9 @@ final class BattleViewModel: ObservableObject {
     }
 
     private func spawnEnemy() {
-        enemyMaxHP = 130 + stage * 35
+        enemyMaxHP = Int(
+            Double(130 + stage * 35) * difficulty.enemyHpMultiplier
+        )
         enemyHP = enemyMaxHP
     }
 
@@ -680,6 +716,12 @@ final class BattleViewModel: ObservableObject {
                 finishEventBattle()
                 return
             }
+        } else if isStoryBattle {
+            eventKills += 1
+            if eventKills >= storyTargetKills {
+                finishStoryBattle()
+                return
+            }
         }
 
         stage += 1
@@ -687,21 +729,21 @@ final class BattleViewModel: ObservableObject {
     }
 
     private func grantKillRewards() {
-        let coins = stageRewardCoins
+        let coins = scaledReward(stageRewardCoins)
         CoinManager.shared.add(coins)
-        PassProgressManager.shared.addPoints(isEventBattle ? 12 : 5)
+        PassProgressManager.shared.addPointsToAllPasses(isEventBattle ? 12 : 5)
 
         if stage.isMultiple(of: 5) {
-            GemManager.shared.add(1)
+            GemManager.shared.add(scaledReward(1))
         }
 
         if isEventBattle {
             let reward = EventRuntime.shared.activeEvent?.rewards
             EventCurrencyManager.shared.add(
-                max(1, (reward?.eventToken ?? 20) / 10)
+                scaledReward(max(1, (reward?.eventToken ?? 20) / 10))
             )
             if stage.isMultiple(of: 3) {
-                RubyManager.shared.add(max(1, reward?.gems ?? 1))
+                RubyManager.shared.add(scaledReward(max(1, reward?.ruby ?? 1)))
             }
         }
 
@@ -716,10 +758,10 @@ final class BattleViewModel: ObservableObject {
         let event = EventRuntime.shared.activeEvent
         let reward = event?.rewards
         let medalDefinition = medalDefinition(for: reward?.medalId)
-        let coins = reward?.coins ?? stageRewardCoins
-        let rubies = reward?.gems ?? 0
-        let tokens = reward?.eventToken ?? 0
-        let draken = reward?.draken ?? 0
+        let coins = scaledReward(reward?.coins ?? stageRewardCoins)
+        let rubies = scaledReward(reward?.ruby ?? 0)
+        let tokens = scaledReward(reward?.eventToken ?? 0)
+        let draken = scaledReward(reward?.draken ?? 0)
         let eggRewards = reward?.eggs ?? []
         let medals = reward?.medals ?? 0
 
@@ -744,6 +786,56 @@ final class BattleViewModel: ObservableObject {
             EventVictoryResult(
                 title: event?.title ?? "Event Clear",
                 icon: event?.icon ?? enemyImageName,
+                coins: coins,
+                rubies: rubies,
+                eventTokens: tokens,
+                draken: draken,
+                eggRewards: eggRewards,
+                medalId: reward?.medalId,
+                medalTitle: medalDefinition?.title,
+                medalIcon: medalDefinition?.icon,
+                medals: medals
+            )
+        )
+    }
+
+    private func finishStoryBattle() {
+        guard !eventEnded else { return }
+        eventEnded = true
+
+        let chapter = appModel?.selectedStoryChapter
+        let reward = chapter?.rewards
+        let medalDefinition = medalDefinition(for: reward?.medalId)
+        let coins = scaledReward(reward?.coins ?? stageRewardCoins)
+        let rubies = scaledReward(reward?.ruby ?? 0)
+        let gems = scaledReward(reward?.gems ?? 0)
+        let tokens = scaledReward(reward?.eventToken ?? 0)
+        let draken = scaledReward(reward?.draken ?? 0)
+        let eggRewards = reward?.eggs ?? []
+        let medals = scaledReward(reward?.medals ?? 0)
+
+        CoinManager.shared.add(coins)
+        RubyManager.shared.add(rubies)
+        GemManager.shared.add(gems)
+        EventCurrencyManager.shared.add(tokens)
+        DrakenManager.shared.add(draken)
+
+        for eggReward in eggRewards {
+            EggInventoryManager.shared.add(
+                scaledReward(eggReward.amount),
+                eggId: eggReward.eggId
+            )
+        }
+
+        if let medalId = reward?.medalId, medals > 0 {
+            DrakonMedalManager.shared.add(medals, medalId: medalId)
+        }
+
+        refreshCurrencies()
+        onEventVictory?(
+            EventVictoryResult(
+                title: chapter?.title ?? "Story Clear",
+                icon: chapter?.icon ?? enemyImageName,
                 coins: coins,
                 rubies: rubies,
                 eventTokens: tokens,
@@ -791,7 +883,10 @@ final class BattleViewModel: ObservableObject {
     }
 
     private var enemyElement: DrakonElement {
-        DrakonElement.parse(EventRuntime.shared.activeEvent?.enemyElement)
+        DrakonElement.parse(
+            EventRuntime.shared.activeEvent?.enemyElement
+                ?? appModel?.selectedStoryChapter?.enemyElement
+        )
     }
 
     private var energyGain: Double {
@@ -808,6 +903,20 @@ final class BattleViewModel: ObservableObject {
 
     private var eventTargetKills: Int {
         max(1, EventRuntime.shared.activeEvent?.targetStages ?? 5)
+    }
+
+    private var storyTargetKills: Int {
+        max(1, appModel?.selectedStoryChapter?.targetStages ?? 5)
+    }
+
+    private var difficulty: BattleDifficulty {
+        appModel?.selectedBattleDifficulty
+            ?? GameConfigManager.shared.config.battleDifficulties.first
+            ?? GameConfig.fallback.battleDifficulties[0]
+    }
+
+    private func scaledReward(_ value: Int) -> Int {
+        Int((Double(value) * difficulty.rewardMultiplier).rounded())
     }
 
     private func loadIdleProgress() {

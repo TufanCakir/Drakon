@@ -2,7 +2,7 @@
 //  DailyRewardManager.swift
 //  Drakon
 //
-//  Created by Tufan Cakir on 02.03.26.
+//  Created by Tufan Cakir on 23.05.26.
 //
 
 import Combine
@@ -53,13 +53,18 @@ final class DailyRewardManager: ObservableObject {
         rewardForToday
     }
 
+    var nextReward: DailyReward? {
+        guard !rewards.isEmpty else { return nil }
+        let nextDay = currentDay >= rewards.count ? 1 : currentDay + 1
+        return rewards.first(where: { $0.day == nextDay })
+    }
+
     func refreshAvailability() {
         rewards = DailyRewardLoader.load()
         load()
         checkAvailability()
     }
 
-    // MARK: - APPLY REWARD (🔥 ZENTRAL)
     private func apply(_ reward: DailyReward) {
 
         if let coins = reward.coins {
@@ -70,16 +75,24 @@ final class DailyRewardManager: ObservableObject {
             GemManager.shared.add(gems)
         }
 
+        if let ruby = reward.ruby {
+            RubyManager.shared.add(ruby)
+        }
+
+        if let draken = reward.draken {
+            DrakenManager.shared.add(draken)
+        }
+
+        if let shards = reward.shards {
+            ShardManager.shared.add(shards)
+        }
+
+        if let eventCurrency = reward.eventCurrency {
+            EventCurrencyManager.shared.add(eventCurrency)
+        }
+
         if let exp = reward.exp {
             PlayerProgressManager.shared.addEXP(exp)
-        }
-
-        if let cCoins = reward.corruptedCoins {
-            CorruptedCoinManager.shared.add(cCoins)
-        }
-
-        if let cGems = reward.corruptedGems {
-            CorruptedGemManager.shared.add(cGems)
         }
     }
 
